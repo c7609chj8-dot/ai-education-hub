@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { EducationIntro } from "./education-intro";
+import { HomePreviews } from "@/components/home-previews";
 
 const learningValues = [
   { title: "쉽게 시작하는 배움", description: "처음 만나는 분도 일상에서 쓰는 말과 예시로 차근차근 배웁니다." },
@@ -64,6 +65,7 @@ export default function Home() {
           <EducationIntro />
         </div>
       </section>
+      <HomePreviews />
     </>
   );
 }

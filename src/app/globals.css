@@ -49,20 +49,20 @@
   }
 
   @media (hover: hover) {
-    .ui-button--primary:enabled:hover {
+    .ui-button--primary:not(:disabled):hover {
       @apply border-blue-hover bg-blue-hover;
     }
 
-    .ui-button--secondary:enabled:hover {
+    .ui-button--secondary:not(:disabled):hover {
       @apply bg-canvas;
     }
   }
 
-  .ui-button--primary:enabled:active {
+  .ui-button--primary:not(:disabled):active {
     @apply border-blue-active bg-blue-active;
   }
 
-  .ui-button--secondary:enabled:active {
+  .ui-button--secondary:not(:disabled):active {
     @apply bg-line;
   }
 
