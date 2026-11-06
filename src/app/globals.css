@@ -1,1 +1,72 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-navy: #0e3558;
+  --color-brand-blue: #2563eb;
+  --color-brand-teal: #14b8a6;
+  --color-blue-hover: #1d4ed8;
+  --color-blue-active: #1e40af;
+  --color-teal-soft: #e2f5f1;
+  --color-teal-ink: #115e59;
+  --color-canvas: #f3f6f9;
+  --color-surface: #ffffff;
+  --color-line: #d5dfe6;
+  --color-ink: #182c3b;
+  --color-muted: #475c6d;
+  --color-disabled: #eef2f5;
+  --font-sans: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+  --spacing: 0.25rem;
+  --radius-card: 1rem;
+  --radius-control: 0.5rem;
+  --text-heading: clamp(1.75rem, 4vw, 2.5rem);
+  --text-heading--line-height: 1.25;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-base leading-relaxed text-ink;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-brand-navy);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .ui-button {
+    @apply inline-flex min-h-11 max-w-full cursor-pointer items-center justify-center gap-2 rounded-control border px-4 py-2 font-semibold;
+  }
+
+  .ui-button--primary {
+    @apply border-brand-blue bg-brand-blue text-white;
+  }
+
+  .ui-button--secondary {
+    @apply border-brand-navy bg-surface text-brand-navy;
+  }
+
+  @media (hover: hover) {
+    .ui-button--primary:enabled:hover {
+      @apply border-blue-hover bg-blue-hover;
+    }
+
+    .ui-button--secondary:enabled:hover {
+      @apply bg-canvas;
+    }
+  }
+
+  .ui-button--primary:enabled:active {
+    @apply border-blue-active bg-blue-active;
+  }
+
+  .ui-button--secondary:enabled:active {
+    @apply bg-line;
+  }
+
+  .ui-button:disabled {
+    @apply cursor-not-allowed border-line bg-disabled text-muted;
+  }
+}
