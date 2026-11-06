@@ -5,5 +5,6 @@ export const siteConfig = {
   description: "누구나 시작하고, 실습으로 완성하는 AI 교육",
   logoSrc: "/icon.svg",
   heroImageSrc: null,
+  socialUrl: null,
   contact: { email: null, phone: null, address: null },
 };

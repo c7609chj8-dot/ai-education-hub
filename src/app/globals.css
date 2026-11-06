@@ -70,3 +70,58 @@
     @apply cursor-not-allowed border-line bg-disabled text-muted;
   }
 }
+
+@layer components {
+  .content-frame {
+    @apply mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-10 sm:px-8;
+  }
+
+  .skip-link {
+    @apply sr-only;
+  }
+
+  .skip-link:focus {
+    @apply not-sr-only fixed start-4 top-3 z-50 rounded-control bg-brand-navy px-4 py-2 text-white;
+  }
+
+  .nav-panel {
+    @apply absolute inset-x-0 top-full hidden max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-surface px-4 py-3 shadow-sm;
+    @apply lg:static lg:flex lg:max-h-none lg:items-center lg:gap-1 lg:overflow-visible lg:border-0 lg:p-0 lg:shadow-none;
+  }
+
+  .nav-panel[data-open="true"] {
+    @apply block lg:flex;
+  }
+
+  .nav-link {
+    @apply flex min-h-11 w-full items-center justify-between gap-1.5 rounded-control px-3 font-semibold text-brand-navy;
+  }
+
+  button.nav-link {
+    @apply cursor-pointer;
+  }
+
+  .nav-link:hover,
+  .nav-link[aria-expanded="true"] {
+    @apply bg-canvas;
+  }
+
+  .nav-link[aria-current="page"],
+  .nav-link[data-current-group="true"] {
+    @apply text-brand-blue underline decoration-2 underline-offset-4;
+  }
+
+  .nav-sublist {
+    @apply mx-3 my-1 border-s-2 border-line ps-2;
+    @apply lg:absolute lg:start-0 lg:top-full lg:m-0 lg:w-44 lg:rounded-control lg:border lg:bg-surface lg:p-2 lg:shadow-md;
+  }
+
+  .footer-link {
+    @apply inline-flex min-h-11 items-center rounded-control text-brand-navy hover:underline;
+  }
+
+  .privacy-note > summary {
+    display: list-item;
+    align-content: center;
+  }
+}

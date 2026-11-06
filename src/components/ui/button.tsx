@@ -1,6 +1,6 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentProps } from "react";
 
-type ButtonProps = ComponentPropsWithoutRef<"button"> & {
+type ButtonProps = ComponentProps<"button"> & {
   variant?: "primary" | "secondary";
 };
 
