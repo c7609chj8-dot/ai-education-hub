@@ -150,9 +150,25 @@ export const courseCatalog = {
 
 export const courses = Object.values(courseCatalog);
 
-export const sampleOfferings = [
-  { id: "sample-life", course: courseCatalog.life, date: "일정 미정", status: "모집 예정" },
-  { id: "sample-work", course: courseCatalog.work, date: "일정 미정", status: "모집 예정" },
+export type OfferingStatus = "모집중" | "마감임박" | "마감" | "예정";
+
+export type Offering = {
+  id: string;
+  course: CoursePreview;
+  startDate: string;
+  endDate: string;
+  location: string;
+  capacity: number;
+  enrolledCount: number;
+  status: OfferingStatus;
+};
+
+export const sampleOfferings: Offering[] = [
+  { id: "sample-life", course: courseCatalog.life, startDate: "2026-11-16", endDate: "2027-02-01", location: "온라인", capacity: 20, enrolledCount: 8, status: "모집중" },
+  { id: "sample-work", course: courseCatalog.work, startDate: "2026-11-16", endDate: "2027-02-01", location: "강의실", capacity: 20, enrolledCount: 18, status: "마감임박" },
+  { id: "sample-ebook", course: courseCatalog.ebook, startDate: "2026-11-24", endDate: "2027-02-09", location: "온라인", capacity: 20, enrolledCount: 20, status: "마감" },
+  { id: "sample-instructor", course: courseCatalog.instructor, startDate: "2026-12-02", endDate: "2027-02-17", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
+  { id: "sample-business", course: courseCatalog.business, startDate: "2026-12-07", endDate: "2027-02-22", location: "온라인", capacity: 20, enrolledCount: 5, status: "모집중" },
 ];
 
 export const sampleOutcomes = [courseCatalog.life, courseCatalog.work, courseCatalog.ebook];

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { courses, sampleOfferings, sampleOutcomes } from "@/data/mock/courses";
+import { formatDate } from "@/lib/dates";
 
 export function HomePreviews() {
   return (
@@ -37,11 +38,11 @@ export function HomePreviews() {
             <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">교육일정 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
           <div className="overflow-hidden rounded-card border border-line bg-surface">
-            {sampleOfferings.map((offering) => (
+            {sampleOfferings.slice(0, 2).map((offering) => (
               <article key={offering.id} className="border-b border-line p-6 last:border-b-0">
                 <p className="text-sm font-semibold text-teal-ink">일정 예시 · {offering.status}</p>
                 <h3 className="mt-2 text-lg font-bold text-brand-navy">{offering.course.title}</h3>
-                <p className="mt-2 text-sm text-muted">{offering.date} · 실제 접수 전</p>
+                <p className="mt-2 text-sm text-muted">{formatDate(offering.startDate)} · 실제 접수 전</p>
               </article>
             ))}
           </div>

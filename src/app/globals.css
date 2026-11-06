@@ -147,3 +147,22 @@
     }
   }
 }
+
+
+@layer components {
+  .calendar-day {
+    @apply relative mx-auto flex min-h-11 w-full max-w-14 items-center justify-center rounded-control text-sm text-ink;
+  }
+
+  .calendar-day--event {
+    @apply cursor-pointer font-bold text-brand-blue hover:bg-canvas;
+  }
+
+  .calendar-day--event[aria-pressed="true"] {
+    @apply bg-brand-navy text-white hover:bg-brand-navy;
+  }
+
+  .calendar-dot {
+    @apply absolute bottom-1.5 size-1.5 rounded-full bg-brand-teal;
+  }
+}
