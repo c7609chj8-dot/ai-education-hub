@@ -53,8 +53,18 @@ export default async function ProgramDetailPage({ params }: PageProps) {
               </ul>
             </div>
             <div className="border-t border-line pt-8">
-              <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
-              <p className="mt-4 leading-relaxed text-muted">{course.weeksCount}주 커리큘럼은 준비 중입니다.</p>
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
+                <p className="text-sm font-semibold text-muted">예정 · {course.weeksCount}주</p>
+              </div>
+              <ol aria-label="주차별 교육내용" className="mt-5 grid gap-2 sm:grid-cols-2">
+                {course.weeks.map((title, index) => (
+                  <li key={`${index}-${title}`} className="flex gap-3 rounded-control border border-line bg-surface px-4 py-3">
+                    <span className="shrink-0 text-sm font-bold text-teal-ink">{index + 1}주</span>
+                    <span className="leading-relaxed text-ink">{title}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">준비물과 안내</h2>
