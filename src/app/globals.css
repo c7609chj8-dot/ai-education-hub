@@ -166,3 +166,30 @@
     @apply absolute bottom-1.5 size-1.5 rounded-full bg-brand-teal;
   }
 }
+
+
+@layer components {
+  .information-item {
+    @apply rounded-card border border-line bg-surface;
+  }
+
+  .information-item > summary {
+    @apply flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-card p-5 sm:p-6;
+  }
+
+  .information-item > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .information-indicator {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-canvas text-2xl leading-none text-brand-navy;
+  }
+
+  .information-item[open] .information-indicator {
+    transform: rotate(45deg);
+  }
+
+  .information-body {
+    @apply mx-5 border-t border-line pb-6 pt-4 leading-relaxed text-ink sm:mx-6;
+  }
+}

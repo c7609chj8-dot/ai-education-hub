@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/dates";
 
@@ -20,6 +21,16 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
   const nameRef = useRef<HTMLInputElement>(null);
   const contactRef = useRef<HTMLInputElement>(null);
   const consentRef = useRef<HTMLInputElement>(null);
+  const completionRef = useRef<HTMLHeadingElement>(null);
+  const retryRef = useRef(false);
+
+  useEffect(() => {
+    if (verified) completionRef.current?.focus();
+    else if (retryRef.current) {
+      offeringRef.current?.focus();
+      retryRef.current = false;
+    }
+  }, [verified]);
 
   function clearError(field: Field) {
     setErrors((previous) => ({ ...previous, [field]: undefined }));
@@ -37,7 +48,13 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
     }
     if (!consent) nextErrors.consent = "시연 안내 확인란을 선택해 주세요.";
     setErrors(nextErrors);
-    setVerified(Object.keys(nextErrors).length === 0);
+    const valid = Object.keys(nextErrors).length === 0;
+    if (valid) {
+      setName("");
+      setContact("");
+      setConsent(false);
+    }
+    setVerified(valid);
 
     if (nextErrors.offering) offeringRef.current?.focus();
     else if (nextErrors.name) nameRef.current?.focus();
@@ -49,6 +66,23 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
   const selectedId = `${prefix}-offering-selected`;
   const inputClass = "mt-2 min-h-11 w-full rounded-control border border-line bg-surface px-4 py-2 text-ink";
   const errorId = (field: Field) => `${prefix}-${field}-error`;
+
+  if (verified && selectedChoice) {
+    return (
+      <div className="rounded-card border border-line bg-surface p-6 sm:p-8">
+        <p className="text-sm font-semibold text-teal-ink">수강신청 시연</p>
+        <h2 ref={completionRef} tabIndex={-1} className="mt-3 text-2xl font-bold text-brand-navy">시연 완료 · 실제 접수 아님</h2>
+        <p className="mt-4 leading-relaxed text-muted">입력한 내용은 전송하거나 저장하지 않았습니다. 실제 수강신청은 접수되지 않았습니다.</p>
+        <p className="mt-5 rounded-control border border-line bg-canvas p-4 text-sm leading-relaxed text-ink">
+          선택한 예시 · {selectedChoice.title} · {formatDate(selectedChoice.startDate)}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button onClick={() => { retryRef.current = true; setVerified(false); }}>다시 시연하기</Button>
+          <Link href="/schedule" className="ui-button ui-button--secondary">교육일정 보기</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-card border border-line bg-surface p-6 sm:p-8">
@@ -87,7 +121,6 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
           {errors.consent && <p id={errorId("consent")} className="mt-2 text-sm font-semibold text-red-700">{errors.consent}</p>}
         </div>
         {Object.values(errors).some(Boolean) && <p role="alert" className="font-semibold text-red-700">입력 항목을 확인해 주세요.</p>}
-        {verified && <p role="status" className="rounded-control border border-line bg-teal-soft p-4 font-semibold text-teal-ink">입력 검사를 통과했습니다. 실제 접수나 저장은 이루어지지 않았습니다.</p>}
         <Button type="submit">입력 내용 확인</Button>
       </form>
     </div>
