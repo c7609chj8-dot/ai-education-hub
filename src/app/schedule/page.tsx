@@ -1,4 +1,5 @@
-import { sampleOfferings } from "@/data/mock/courses";
+import { Suspense } from "react";
+import { courses, sampleOfferings } from "@/data/mock/courses";
 import { sections } from "@/config/navigation";
 import { Schedule } from "./schedule";
 
@@ -21,7 +22,9 @@ export default function SchedulePage() {
           </p>
         </div>
       </section>
-      <Schedule offerings={sampleOfferings} />
+      <Suspense fallback={<div className="content-frame"><p className="text-muted">교육일정을 불러오는 중입니다.</p></div>}>
+        <Schedule offerings={sampleOfferings} courseOptions={courses.map(({ id, title }) => ({ id, title }))} />
+      </Suspense>
     </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Offering } from "@/data/mock/courses";
@@ -33,13 +34,57 @@ function OfferingList({ offerings }: { offerings: Offering[] }) {
   );
 }
 
-export function Schedule({ offerings }: { offerings: Offering[] }) {
-  const [month, setMonth] = useState(offerings[0]?.startDate.slice(0, 7) ?? "");
+export function Schedule({
+  offerings,
+  courseOptions,
+}: {
+  offerings: Offering[];
+  courseOptions: { id: string; title: string }[];
+}) {
+  const courseId = useSearchParams().get("course") || null;
+  const selectedCourse = courseOptions.find((course) => course.id === courseId);
+
+  if (courseId && !selectedCourse) {
+    return (
+      <div className="content-frame">
+        <div>
+          <p className="font-semibold text-brand-navy">선택한 교육과정을 찾을 수 없습니다.</p>
+          <Link href="/schedule" className="mt-3 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 교육일정 보기</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const visibleOfferings = selectedCourse
+    ? offerings.filter((offering) => offering.course.id === selectedCourse.id)
+    : offerings;
+
+  return (
+    <ScheduleCalendar
+      key={courseId ?? "all"}
+      offerings={visibleOfferings}
+      courseTitle={selectedCourse?.title}
+    />
+  );
+}
+
+function ScheduleCalendar({ offerings, courseTitle }: { offerings: Offering[]; courseTitle?: string }) {
+  const firstOffering = offerings.reduce<Offering | undefined>((earliest, offering) => (
+    !earliest || offering.startDate < earliest.startDate ? offering : earliest
+  ), undefined);
+  const [month, setMonth] = useState(firstOffering?.startDate.slice(0, 7) ?? "");
   const [view, setView] = useState<"calendar" | "list">("calendar");
-  const [selectedDay, setSelectedDay] = useState<string | null>(offerings[0]?.startDate ?? null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(firstOffering?.startDate ?? null);
 
   if (!month) {
-    return <div className="content-frame"><p className="text-muted">표시할 예시 일정이 없습니다.</p></div>;
+    return (
+      <div className="content-frame">
+        <div>
+          <p className="font-semibold text-brand-navy">{courseTitle ? `${courseTitle}의 예시 일정이 없습니다.` : "표시할 예시 일정이 없습니다."}</p>
+          {courseTitle && <Link href="/schedule" className="mt-3 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 교육일정 보기</Link>}
+        </div>
+      </div>
+    );
   }
 
   const [year, monthNumber] = month.split("-").map(Number);
@@ -59,6 +104,12 @@ export function Schedule({ offerings }: { offerings: Offering[] }) {
   return (
     <section aria-label="예시 교육일정" className="bg-canvas">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
+        {courseTitle && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface px-5 py-3">
+            <p className="font-semibold text-brand-navy">선택한 과정 · {courseTitle}</p>
+            <Link href="/schedule" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 교육일정 보기</Link>
+          </div>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button variant="secondary" aria-label="이전 달" onClick={() => changeMonth(-1)}>←</Button>
