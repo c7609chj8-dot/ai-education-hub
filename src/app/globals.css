@@ -125,3 +125,25 @@
     align-content: center;
   }
 }
+
+
+@layer components {
+  .course-filter span {
+    @apply inline-flex min-h-11 cursor-pointer items-center rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-brand-navy;
+  }
+
+  .course-filter input:checked + span {
+    @apply border-brand-navy bg-brand-navy text-white;
+  }
+
+  .course-filter input:focus-visible + span {
+    outline: 3px solid var(--color-brand-blue);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .course-filter input:not(:checked) + span:hover {
+      @apply bg-canvas;
+    }
+  }
+}

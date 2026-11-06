@@ -21,7 +21,7 @@ export function HomePreviews() {
                 <h3 className="mt-3 text-xl font-bold leading-snug text-brand-navy">{course.title}</h3>
                 <p className="mt-3 flex-1 leading-relaxed text-muted">{course.summary}</p>
                 <p className="mt-5 text-sm text-muted">대상 · {course.audience}</p>
-                <Link href="/programs" aria-label={`${course.title} 교육과정 목록 보기`} className="mt-4 inline-flex min-h-11 w-fit items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">교육과정 목록 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
+                <Link href={`/programs/${course.slug}`} aria-label={`${course.title} 안내 보기`} className="mt-4 inline-flex min-h-11 w-fit items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">과정 안내 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
               </article>
             ))}
           </div>
