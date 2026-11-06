@@ -3,12 +3,7 @@
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-type EducationIntroProps = {
-  slogan: string;
-  description: string;
-};
-
-export function EducationIntro({ slogan, description }: EducationIntroProps) {
+export function EducationIntro() {
   const [expanded, setExpanded] = useState(false);
   const panelId = useId();
 
@@ -28,8 +23,8 @@ export function EducationIntro({ slogan, description }: EducationIntroProps) {
         <Button variant="secondary" disabled>수강 신청 준비 중</Button>
       </div>
       <div id={panelId} hidden={!expanded} className="mt-6 border-s-4 border-brand-teal ps-4">
-        <p className="font-semibold text-brand-navy">{slogan}</p>
-        <p className="mt-1 text-muted">{description}</p>
+        <p className="font-semibold text-brand-navy">초기 과정은 12주 동안 주 2시간으로 준비하고 있습니다.</p>
+        <p className="mt-1 text-muted">생활과 업무에 활용할 수 있도록 실습을 중심으로 진행할 예정입니다.</p>
       </div>
     </div>
   );
