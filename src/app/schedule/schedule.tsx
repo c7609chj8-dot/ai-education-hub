@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Offering } from "@/data/mock/courses";
 import { formatDate, formatMonth, moveMonth } from "@/lib/dates";
+import { canDemoApply } from "@/lib/offerings";
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -28,6 +29,13 @@ function OfferingList({ offerings }: { offerings: Offering[] }) {
             <div><dt className="font-semibold text-muted">장소 예시</dt><dd className="mt-1 text-ink">{offering.location}</dd></div>
             <div><dt className="font-semibold text-muted">정원 예시</dt><dd className="mt-1 text-ink">{offering.enrolledCount} / {offering.capacity}명</dd></div>
           </dl>
+            {canDemoApply(offering) ? (
+              <Link href={`/apply/${offering.id}`} aria-label={`${offering.course.title} 신청 시연`} className="ui-button ui-button--secondary mt-4">
+                신청 시연 <span aria-hidden="true">→</span>
+              </Link>
+            ) : (
+              <p className="mt-4 text-sm font-semibold text-muted">이 기수는 신청 시연 대상이 아닙니다.</p>
+            )}
         </li>
       ))}
     </ul>
