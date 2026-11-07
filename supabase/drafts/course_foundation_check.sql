@@ -5,6 +5,9 @@ DO $test$
 DECLARE
   test_course_id uuid;
   protected_count integer;
+  target_role text;
+  target_table text;
+  target_privilege text;
 BEGIN
   SELECT count(*) INTO protected_count
   FROM pg_class AS c JOIN pg_namespace AS n ON n.oid = c.relnamespace
@@ -15,10 +18,20 @@ BEGIN
      OR has_schema_privilege('authenticated', 'academy', 'USAGE') THEN
     RAISE EXCEPTION 'Public client roles must not access academy schema';
   END IF;
-  IF has_table_privilege('anon', 'academy.courses', 'SELECT')
-     OR has_table_privilege('authenticated', 'academy.courses', 'SELECT') THEN
-    RAISE EXCEPTION 'Public client roles must not access course rows';
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'academy'
+             AND tablename IN ('courses', 'course_weeks', 'offerings')) THEN
+    RAISE EXCEPTION 'Draft tables must not have access policies';
   END IF;
+  FOREACH target_role IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+    FOREACH target_table IN ARRAY ARRAY['academy.courses', 'academy.course_weeks', 'academy.offerings'] LOOP
+      FOREACH target_privilege IN ARRAY ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE',
+                                            'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'] LOOP
+        IF has_table_privilege(target_role, target_table, target_privilege) THEN
+          RAISE EXCEPTION 'Unexpected % privilege for % on %', target_privilege, target_role, target_table;
+        END IF;
+      END LOOP;
+    END LOOP;
+  END LOOP;
 
   INSERT INTO academy.courses (slug, title, category, summary, audience, result_artifact)
   VALUES ('test-course-day04', 'Test', 'Test', 'Test', 'Test', 'Test') RETURNING id INTO test_course_id;
