@@ -33,7 +33,7 @@ export default function Home() {
             <figure>
               <Image
                 src={siteConfig.heroImageSrc}
-                alt="여러 세대의 성인 학습자들이 강사와 함께 노트북을 살펴보는 모습"
+                alt="여러 세대의 성인 학습자들이 강사와 노트북을 살펴보는 AI 생성 예시 이미지"
                 width={1536}
                 height={1024}
                 priority
