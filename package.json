@@ -23,7 +23,9 @@
     "test:asset-database": "node scripts/verify-asset-database.mjs",
     "test:asset-services": "node scripts/verify-asset-services.mjs",
     "test:brand-database": "node scripts/verify-brand-database.mjs",
-    "test:brand-services": "node scripts/verify-brand-services.mjs"
+    "test:brand-services": "node scripts/verify-brand-services.mjs",
+    "test:activity-database": "node scripts/verify-activity-database.mjs",
+    "test:activity-services": "node scripts/verify-activity-services.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
