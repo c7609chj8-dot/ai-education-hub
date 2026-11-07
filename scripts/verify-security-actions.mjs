@@ -1,0 +1,8 @@
+// Server action outcomes are tested with injected functions; no network or real data.
+import assert from "node:assert/strict";import fs from "node:fs";import vm from "node:vm";import ts from "typescript";
+const code=ts.transpileModule(fs.readFileSync("src/app/admin/console/management-actions.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+let access="allowed",saved=false,valid=true,paths=[];
+const imports={"next/cache":{revalidatePath:(p)=>paths.push(p)},"@/lib/admin/access":{getAdminAccess:async()=>access},"@/lib/admin/management":{saveCourse:async()=>saved,saveOffering:async()=>saved},"@/lib/admin/management-validation":{parseCourseForm:()=>valid?{ok:true,value:{}}:{ok:false,error:"invalid"},parseOfferingForm:()=>valid?{ok:true,value:{}}:{ok:false,error:"invalid"}}};
+const m={exports:{}};vm.runInNewContext(code,{module:m,exports:m.exports,require:(n)=>imports[n]??(()=>{throw Error("Unexpected import")})()});
+for(const action of [m.exports.submitCourse,m.exports.submitOffering]){access="forbidden";assert.equal((await action(null,new FormData())).error,"접근 권한이 없습니다.");access="allowed";valid=false;assert.equal((await action(null,new FormData())).error,"invalid");valid=true;saved=false;const unknown=await action(null,new FormData());assert.equal(unknown.unknown,true);assert.match(unknown.error,/결과를 확인하지 못했습니다/);assert.equal(paths.length,0);saved=true;assert.ok((await action(null,new FormData())).success);assert.ok(paths.length>0);paths=[];}
+console.log("PASS: admin course/offering action distinguishes uncertain save from validation and success");

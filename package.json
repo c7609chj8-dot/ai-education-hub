@@ -25,7 +25,10 @@
     "test:brand-database": "node scripts/verify-brand-database.mjs",
     "test:brand-services": "node scripts/verify-brand-services.mjs",
     "test:activity-database": "node scripts/verify-activity-database.mjs",
-    "test:activity-services": "node scripts/verify-activity-services.mjs"
+    "test:activity-services": "node scripts/verify-activity-services.mjs",
+    "test:security-config": "node scripts/verify-security-config.mjs",
+    "test:security-management": "node scripts/verify-security-management.mjs",
+    "test:security-actions": "node scripts/verify-security-actions.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

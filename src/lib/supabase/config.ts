@@ -1,3 +1,7 @@
+// Development credentials must never be sent to another project or an arbitrary URL.
+// Production authentication requires a separately reviewed environment design.
+const DEV_ORIGIN = "https://uenvjqgylrevujdjpfed.supabase.co";
+
 export function getSupabaseAuthConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -5,8 +9,7 @@ export function getSupabaseAuthConfig() {
 
   try {
     const parsed = new URL(url);
-    const isLocal = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-    if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && isLocal)) return null;
+    if (parsed.origin !== DEV_ORIGIN || parsed.pathname !== "/" || parsed.search || parsed.hash || parsed.username || parsed.password) return null;
     return { url, publishableKey };
   } catch {
     return null;
