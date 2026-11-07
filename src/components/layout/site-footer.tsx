@@ -1,21 +1,24 @@
 import Link from "next/link";
 import { sections } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
+import type { Brand } from "@/lib/brand/types";
 
-export function SiteFooter() {
-  const { email, phone, address } = siteConfig.contact;
+export function SiteFooter({brand,status}:{brand:Brand;status:"default"|"example"|"unavailable"}) {
+  const { email, phone, address } = brand;
   return (
     <footer className="border-t border-line bg-surface text-sm text-muted">
       <div className="mx-auto grid max-w-6xl gap-4 px-4 py-6 sm:px-8 lg:grid-cols-2">
         <div>
           <p className="font-semibold text-brand-navy">
-            {siteConfig.name}{siteConfig.nameQualifier && ` (${siteConfig.nameQualifier})`}
+            {brand.name}
           </p>
+          {status === "example" && <p className="mt-1 text-xs font-semibold">개발용 시연 정보입니다. 실제 운영 정보가 아닙니다.</p>}
+          {status === "unavailable" && <p role="status" className="mt-1 text-xs">운영 정보를 불러오지 못했습니다.</p>}
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-            {email && <a href={`mailto:${email}`}>{email}</a>}
-            {phone && <a href={`tel:${phone}`}>{phone}</a>}
+            {email && <span className="min-w-0 break-all">{email}</span>}
+            {phone && <span>{phone}</span>}
             {!email && !phone && <span>연락처 추후 확정</span>}
-            {address && <span>{address}</span>}
+            {address && <span className="min-w-0 break-words">{address}</span>}
             {siteConfig.socialUrl
               ? <a href={siteConfig.socialUrl}>공식 SNS</a>
               : <span>공식 SNS 추후 확정</span>}
