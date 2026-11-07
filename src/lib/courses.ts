@@ -24,7 +24,7 @@ export function courseDataIsExample(source: CourseSource) {
   return source === "mock" || process.env.ACADEMY_COURSE_DEMO_DATA !== "false";
 }
 
-function client() {
+export function createPublishedDataClient() {
   const config = getSupabaseAuthConfig();
   if (!config) throw new CourseDataUnavailable();
   return createClient(config.url, config.publishableKey, {
@@ -47,7 +47,7 @@ export async function listCourses(): Promise<{ courses: CoursePreview[]; source:
   const source = getCourseSource();
   if (source === "mock") return { courses: exampleCourses, source, example: true };
   await connection();
-  const { data, error } = await client().from("published_courses")
+  const { data, error } = await createPublishedDataClient().from("published_courses")
     .select("id, slug, title, category, audience, summary, result_artifact").order("title");
   if (error || !Array.isArray(data)) throw new CourseDataUnavailable();
   return { courses: data.map(preview), source, example: courseDataIsExample(source) };
@@ -60,7 +60,7 @@ export const findCourse = cache(async (slug: string): Promise<{ course: CourseDe
     const course = exampleCourses.find((item) => item.slug === slug);
     return course ? { course: { ...course, weeks: course.weeks.map((title, index) => ({ weekNumber: index + 1, title })) }, source, example: true } : null;
   }
-  const supabase = client();
+  const supabase = createPublishedDataClient();
   const { data, error } = await supabase.from("published_courses")
     .select("id, slug, title, category, audience, summary, result_artifact, duration_hours, objectives")
     .eq("slug", slug).maybeSingle();

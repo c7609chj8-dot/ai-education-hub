@@ -1,20 +1,32 @@
 import Link from "next/link";
-import { sampleOfferings, sampleOutcomes, type CoursePreview } from "@/data/mock/courses";
+import { sampleOutcomes, type CoursePreview } from "@/data/mock/courses";
 import { unstable_rethrow } from "next/navigation";
 import { listCourses } from "@/lib/courses";
+import { listSchedule } from "@/lib/schedule-data";
+import type { ScheduleOffering } from "@/lib/schedule-types";
 import { formatDate } from "@/lib/dates";
 
 export async function HomePreviews() {
   let courses: CoursePreview[] = [];
+  let offerings: ScheduleOffering[] = [];
   let example = false;
+  let scheduleExample = false;
   let unavailable = false;
-  try {
-    const result = await listCourses();
-    courses = result.courses;
-    example = result.example;
-  } catch (error) {
-    unstable_rethrow(error);
+  let scheduleUnavailable = false;
+  const [courseResult, scheduleResult] = await Promise.allSettled([listCourses(), listSchedule()]);
+  if (courseResult.status === "fulfilled") {
+    courses = courseResult.value.courses;
+    example = courseResult.value.example;
+  } else {
+    unstable_rethrow(courseResult.reason);
     unavailable = true;
+  }
+  if (scheduleResult.status === "fulfilled") {
+    offerings = scheduleResult.value.offerings;
+    scheduleExample = scheduleResult.value.example;
+  } else {
+    unstable_rethrow(scheduleResult.reason);
+    scheduleUnavailable = true;
   }
   return (
     <>
@@ -48,15 +60,15 @@ export async function HomePreviews() {
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">교육일정</p>
             <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">배움을 준비하는 시간</h2>
-            <p className="mt-4 leading-relaxed text-muted">개강 일정은 확정 후 안내합니다. 아래 내용은 화면 구성 예시입니다.</p>
+            <p className="mt-4 leading-relaxed text-muted">{scheduleExample ? "개강 일정은 확정 후 안내합니다. 아래 내용은 화면 구성 예시입니다." : "개강 일정을 확인해 보세요."}</p>
             <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">교육일정 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
           <div className="overflow-hidden rounded-card border border-line bg-surface">
-            {sampleOfferings.slice(0, 2).map((offering) => (
+            {scheduleUnavailable ? <p role="alert" className="p-6 text-muted">교육일정을 불러올 수 없습니다.</p> : offerings.length === 0 ? <p className="p-6 text-muted">등록된 교육일정이 없습니다.</p> : offerings.slice(0, 2).map((offering) => (
               <article key={offering.id} className="border-b border-line p-6 last:border-b-0">
-                <p className="text-sm font-semibold text-teal-ink">일정 예시 · {offering.status}</p>
+                <p className="text-sm font-semibold text-teal-ink">{scheduleExample ? "일정 예시 · " : ""}{offering.status}</p>
                 <h3 className="mt-2 text-lg font-bold text-brand-navy">{offering.course.title}</h3>
-                <p className="mt-2 text-sm text-muted">{formatDate(offering.startDate)} · 실제 접수 전</p>
+                <p className="mt-2 text-sm text-muted">{offering.startDate ? formatDate(offering.startDate) : "날짜 미정"}{scheduleExample ? " · 실제 접수 전" : ""}</p>
               </article>
             ))}
           </div>

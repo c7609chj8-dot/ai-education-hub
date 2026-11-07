@@ -1,11 +1,13 @@
 import { Suspense } from "react";
-import { courses, sampleOfferings } from "@/data/mock/courses";
+import { listCourses } from "@/lib/courses";
+import { listSchedule } from "@/lib/schedule-data";
 import { sections } from "@/config/navigation";
 import { Schedule } from "./schedule";
 
 export const metadata = { title: sections.schedule.label };
 
-export default function SchedulePage() {
+export default async function SchedulePage() {
+  const [{ offerings, example }, { courses }] = await Promise.all([listSchedule(), listCourses()]);
   return (
     <>
       <section className="bg-surface">
@@ -17,13 +19,13 @@ export default function SchedulePage() {
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
             과정별 일정을 달력과 목록으로 확인할 수 있습니다.
           </p>
-          <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-teal-ink">
+          {example && <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-teal-ink">
             시연용 예시 일정입니다. 실제 모집·접수 정보는 확정 후 안내합니다.
-          </p>
+          </p>}
         </div>
       </section>
       <Suspense fallback={<div className="content-frame"><p className="text-muted">교육일정을 불러오는 중입니다.</p></div>}>
-        <Schedule offerings={sampleOfferings} courseOptions={courses.map(({ id, title }) => ({ id, title }))} />
+        <Schedule offerings={offerings} example={example} courseOptions={courses.map(({ id, title }) => ({ id, title }))} />
       </Suspense>
     </>
   );
