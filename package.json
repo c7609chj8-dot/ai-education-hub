@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:course-access": "node scripts/verify-course-access.mjs"
+    "test:course-access": "node scripts/verify-course-access.mjs",
+    "test:schedule-access": "node scripts/verify-schedule-access.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
