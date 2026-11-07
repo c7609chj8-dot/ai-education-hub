@@ -5,6 +5,8 @@
 ## 현재 배포와 인수인계
 
 [Vercel 시연 사이트](https://ai-education-hub-ten.vercel.app)는 GitHub `main`과 연결되어 있습니다. 신청·문의·관리자는 실제 접수나 저장이 없는 시연이며, 관리자 시연에는 인증이 없습니다. [20일 작업 결과와 인수인계](docs/day20-handover.md)에서 화면 목록·검수 결과·남은 문제와 후속 Supabase 연계 계획을 확인할 수 있습니다.
+후속 실제 운영 기능의 범위와 예상 일정은 [백엔드 구축 작업계획서](docs/backend-implementation-plan.md)를 참고하세요.
+
 ## 로컬 실행
 
 초기 검수 환경은 Node.js 24.20.0과 npm 11.19.0입니다. 프로젝트 루트에서 실행합니다.
