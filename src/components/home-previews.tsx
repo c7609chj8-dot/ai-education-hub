@@ -1,8 +1,21 @@
 import Link from "next/link";
-import { courses, sampleOfferings, sampleOutcomes } from "@/data/mock/courses";
+import { sampleOfferings, sampleOutcomes, type CoursePreview } from "@/data/mock/courses";
+import { unstable_rethrow } from "next/navigation";
+import { listCourses } from "@/lib/courses";
 import { formatDate } from "@/lib/dates";
 
-export function HomePreviews() {
+export async function HomePreviews() {
+  let courses: CoursePreview[] = [];
+  let example = false;
+  let unavailable = false;
+  try {
+    const result = await listCourses();
+    courses = result.courses;
+    example = result.example;
+  } catch (error) {
+    unstable_rethrow(error);
+    unavailable = true;
+  }
   return (
     <>
       <section aria-labelledby="programs-heading" className="bg-surface">
@@ -12,10 +25,11 @@ export function HomePreviews() {
               <p className="text-sm font-bold tracking-wide text-teal-ink">교육과정</p>
               <h2 id="programs-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">관심에서 시작하는 AI 배움</h2>
               <p className="mt-4 text-muted">생활부터 업무와 창업까지, 나에게 필요한 과정을 찾아보세요.</p>
+              {example && <p className="mt-2 text-sm text-muted">교육과정은 예시로 제공됩니다.</p>}
             </div>
             <Link href="/programs" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">교육과정 전체 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {unavailable ? <p role="alert" className="mt-9 text-muted">교육과정을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.</p> : courses.length === 0 ? <p className="mt-9 text-muted">등록된 교육과정이 없습니다.</p> : <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {courses.map((course) => (
               <article key={course.id} className="flex flex-col rounded-card border border-line bg-canvas p-6">
                 <p className="text-sm font-semibold text-teal-ink">{course.category}</p>
@@ -25,7 +39,7 @@ export function HomePreviews() {
                 <Link href={`/programs/${course.slug}`} aria-label={`${course.title} 안내 보기`} className="mt-4 inline-flex min-h-11 w-fit items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">과정 안내 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
               </article>
             ))}
-          </div>
+          </div>}
         </div>
       </section>
 

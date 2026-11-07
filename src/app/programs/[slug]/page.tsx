@@ -1,31 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { courses } from "@/data/mock/courses";
+import { findCourse } from "@/lib/courses";
 
-// 예시 강좌에 없는 주소는 첫 요청부터 404로 처리합니다.
-export const dynamicParams = false;
-
+export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
-
-export function generateStaticParams() {
-  return courses.map((course) => ({ slug: course.slug }));
-}
 
 async function getCourse(params: PageProps["params"]) {
   const { slug } = await params;
-  const course = courses.find((item) => item.slug === slug);
-  if (!course) notFound();
-  return course;
+  const result = await findCourse(slug);
+  if (!result) notFound();
+  return result;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const course = await getCourse(params);
+  const { course } = await getCourse(params);
   return { title: course.title, description: course.summary };
 }
 
 export default async function ProgramDetailPage({ params }: PageProps) {
-  const course = await getCourse(params);
+  const { course, source, example } = await getCourse(params);
   return (
     <>
       <section className="bg-surface">
@@ -38,6 +32,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             {course.title}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{course.summary}</p>
+          {example && <p className="mt-3 text-sm text-muted">예시 교육과정입니다.</p>}
         </div>
       </section>
 
@@ -46,28 +41,28 @@ export default async function ProgramDetailPage({ params }: PageProps) {
           <div className="space-y-10">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">이런 내용을 배웁니다</h2>
-              <ul className="mt-5 space-y-4">
+              {course.objectives.length > 0 ? <ul className="mt-5 space-y-4">
                 {course.objectives.map((objective) => (
                   <li key={objective} className="flex gap-3 leading-relaxed text-ink">
                     <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-brand-teal" />
                     <span>{objective}</span>
                   </li>
                 ))}
-              </ul>
+              </ul> : <p className="mt-4 text-muted">교육 목표를 준비하고 있습니다.</p>}
             </div>
             <div className="border-t border-line pt-8">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
-                <p className="text-sm font-semibold text-muted">예정 · {course.weeksCount}주</p>
+                <p className="text-sm font-semibold text-muted">{course.weeks.length > 0 ? `예정 · ${course.weeks.length}주` : "안내 예정"}</p>
               </div>
-              <ol aria-label="주차별 교육내용" className="mt-5 grid gap-2 sm:grid-cols-2">
-                {course.weeks.map((title, index) => (
-                  <li key={`${index}-${title}`} className="flex gap-3 rounded-control border border-line bg-surface px-4 py-3">
-                    <span className="shrink-0 text-sm font-bold text-teal-ink">{index + 1}주</span>
-                    <span className="leading-relaxed text-ink">{title}</span>
+              {course.weeks.length > 0 ? <ol aria-label="주차별 교육내용" className="mt-5 grid gap-2 sm:grid-cols-2">
+                {course.weeks.map((week) => (
+                  <li key={week.weekNumber} className="flex gap-3 rounded-control border border-line bg-surface px-4 py-3">
+                    <span className="shrink-0 text-sm font-bold text-teal-ink">{week.weekNumber}주</span>
+                    <span className="leading-relaxed text-ink">{week.title}</span>
                   </li>
                 ))}
-              </ol>
+              </ol> : <p className="mt-4 text-muted">주차별 교육내용을 준비하고 있습니다.</p>}
             </div>
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">준비물과 안내</h2>
@@ -79,11 +74,11 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             <h2 id="course-facts-heading" className="text-xl font-bold text-brand-navy">과정 안내</h2>
             <dl className="mt-5 space-y-5">
               <div><dt className="text-sm font-semibold text-muted">교육 대상</dt><dd className="mt-1 font-semibold text-brand-navy">{course.audience}</dd></div>
-              <div><dt className="text-sm font-semibold text-muted">예정 교육시간</dt><dd className="mt-1 font-semibold text-brand-navy">{course.weeksCount}주 · 주 2시간 · 총 {course.durationHours}시간</dd></div>
+              <div><dt className="text-sm font-semibold text-muted">예정 교육시간</dt><dd className="mt-1 font-semibold text-brand-navy">{course.durationHours === null ? "안내 예정" : `총 ${course.durationHours}시간`}</dd></div>
               <div><dt className="text-sm font-semibold text-muted">예상 결과물</dt><dd className="mt-1 font-semibold text-brand-navy">{course.resultArtifact}</dd></div>
             </dl>
             <p className="mt-6 border-t border-line pt-5 text-sm leading-relaxed text-muted">개강 일정과 모집 정보는 확정 후 안내합니다.</p>
-            <Link href={`/schedule?course=${encodeURIComponent(course.id)}`} className="ui-button ui-button--primary mt-4 w-full">교육일정 확인하기 <span aria-hidden="true">→</span></Link>
+            {source === "mock" && <Link href={`/schedule?course=${encodeURIComponent(course.id)}`} className="ui-button ui-button--primary mt-4 w-full">교육일정 확인하기 <span aria-hidden="true">→</span></Link>}
           </aside>
         </div>
       </section>
