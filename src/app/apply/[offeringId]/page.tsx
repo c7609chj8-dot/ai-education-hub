@@ -5,8 +5,8 @@ import { sampleOfferings } from "@/data/mock/courses";
 import { canDemoApply } from "@/lib/offerings";
 import { ApplicationForm } from "./application-form";
 
-// 기수 확인을 완료한 뒤 화면을 표시해 잘못된 주소의 404를 유지합니다.
-export const instant = false;
+// 예시 기수에 없는 주소는 첫 요청부터 404로 처리합니다.
+export const dynamicParams = false;
 
 type PageProps = { params: Promise<{ offeringId: string }> };
 

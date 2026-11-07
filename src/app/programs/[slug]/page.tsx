@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { courses } from "@/data/mock/courses";
 
+// 예시 강좌에 없는 주소는 첫 요청부터 404로 처리합니다.
+export const dynamicParams = false;
+
 type PageProps = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
