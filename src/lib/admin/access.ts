@@ -13,8 +13,16 @@ function allowedAdminIds(): Set<string> {
   return new Set(ids.map((id) => id.toLowerCase()));
 }
 
-export async function getAdminAccess(): Promise<"unauthenticated" | "forbidden" | "allowed"> {
+export type AdminIdentity = { access: "allowed"; userId: string } | { access: "unauthenticated" | "forbidden" };
+
+// Return the identity from the same verified session used for the allowlist decision.
+export async function getAdminIdentity(): Promise<AdminIdentity> {
   const user = await getVerifiedUser();
-  if (!user) return "unauthenticated";
-  return allowedAdminIds().has(user.id.toLowerCase()) ? "allowed" : "forbidden";
+  if (!user) return { access: "unauthenticated" };
+  if (!allowedAdminIds().has(user.id.toLowerCase())) return { access: "forbidden" };
+  return { access: "allowed", userId: user.id.toLowerCase() };
+}
+
+export async function getAdminAccess(): Promise<"unauthenticated" | "forbidden" | "allowed"> {
+  return (await getAdminIdentity()).access;
 }
