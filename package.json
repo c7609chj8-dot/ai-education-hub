@@ -10,7 +10,9 @@
     "test:course-access": "node scripts/verify-course-access.mjs",
     "test:schedule-access": "node scripts/verify-schedule-access.mjs",
     "test:admin-management": "node scripts/verify-admin-management.mjs",
-    "test:admin-validation": "node scripts/verify-admin-validation.mjs"
+    "test:admin-validation": "node scripts/verify-admin-validation.mjs",
+    "test:application-validation": "node scripts/verify-application-validation.mjs",
+    "test:application-schema": "node scripts/verify-application-schema.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
