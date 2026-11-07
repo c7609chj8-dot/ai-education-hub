@@ -19,7 +19,9 @@
     "test:inquiry-database": "node scripts/verify-inquiry-database.mjs",
     "test:inquiry-services": "node scripts/verify-inquiry-services.mjs",
     "test:content-database": "node scripts/verify-content-database.mjs",
-    "test:content-services": "node scripts/verify-content-services.mjs"
+    "test:content-services": "node scripts/verify-content-services.mjs",
+    "test:asset-database": "node scripts/verify-asset-database.mjs",
+    "test:asset-services": "node scripts/verify-asset-services.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

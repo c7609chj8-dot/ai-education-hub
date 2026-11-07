@@ -1,7 +1,10 @@
+import {assetSource} from "@/lib/assets/public";
+import {AssetsUnavailable,PublishedAssets} from "@/components/assets/published-assets";
 import Link from "next/link";
 import { sections } from "@/config/navigation";
 
 export const metadata = { title: sections.resources.label };
+export const dynamic = "force-dynamic";
 
 const resourceTopics = [
   { title: "AI 시작하기", description: "AI 도구를 처음 사용하는 분을 위한 기초 학습 자료를 준비합니다.", tag: "기초" },
@@ -10,6 +13,8 @@ const resourceTopics = [
 ];
 
 export default function ResourcesPage() {
+  let source: "mock" | "supabase" | null = null;try { source=assetSource(); } catch { /* Invalid configuration fails closed. */ }
+  if(!source)return <AssetsUnavailable/>;if(source==="supabase")return <PublishedAssets kind="resource"/>;
   return (
     <>
       <section className="bg-surface"><div className="mx-auto max-w-6xl px-4 py-14 sm:px-8 sm:py-16"><p className="text-sm font-bold tracking-wide text-teal-ink">교육정보</p><h1 className="mt-4 text-4xl font-bold tracking-tight text-brand-navy sm:text-5xl">교육자료실</h1><p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">배움에 도움이 되는 자료를 한곳에서 살펴볼 수 있도록 준비하고 있습니다.</p><p className="mt-3 text-sm font-semibold text-teal-ink">아래는 자료 분류 예시이며 현재 제공되는 파일은 없습니다.</p></div></section>
