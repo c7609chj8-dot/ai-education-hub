@@ -11,6 +11,8 @@ async function authorizedClient() {
   const config = getSupabaseAuthConfig();
   const key = process.env.SUPABASE_SECRET_KEY;
   if (process.env.ACADEMY_ADMIN_MANAGEMENT_ENABLED !== "true" || !config || !key?.startsWith("sb_secret_")) return null;
+  const url = new URL(config.url);
+  if (url.origin !== "https://uenvjqgylrevujdjpfed.supabase.co" || url.pathname !== "/" || url.search || url.hash || url.username || url.password) return null;
   return createClient(config.url, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
