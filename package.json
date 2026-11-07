@@ -17,7 +17,9 @@
     "test:application-submission": "node scripts/verify-application-submission.mjs",
     "test:admin-applications": "node scripts/verify-admin-applications.mjs",
     "test:inquiry-database": "node scripts/verify-inquiry-database.mjs",
-    "test:inquiry-services": "node scripts/verify-inquiry-services.mjs"
+    "test:inquiry-services": "node scripts/verify-inquiry-services.mjs",
+    "test:content-database": "node scripts/verify-content-database.mjs",
+    "test:content-services": "node scripts/verify-content-services.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

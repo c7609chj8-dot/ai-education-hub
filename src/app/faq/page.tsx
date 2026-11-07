@@ -1,10 +1,17 @@
+import {contentSource} from "@/lib/content/public";
+import {ContentUnavailable,PublishedContent} from "@/components/content/published-content";
 import { sections } from "@/config/navigation";
 import { sampleFaqs } from "@/data/mock/information";
 import { FaqList } from "./faq-list";
 
 export const metadata = { title: sections.faq.label };
+export const dynamic = "force-dynamic";
 
 export default function FaqPage() {
+  let source: "mock" | "supabase" | null = null;
+  try { source = contentSource(); } catch { /* Invalid configuration fails closed. */ }
+  if (!source) return <ContentUnavailable/>;
+  if (source === "supabase") return <PublishedContent kind="faq"/>;
   return (
     <>
       <section className="bg-surface">
