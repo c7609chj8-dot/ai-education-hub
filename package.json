@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test:course-access": "node scripts/verify-course-access.mjs",
-    "test:schedule-access": "node scripts/verify-schedule-access.mjs"
+    "test:schedule-access": "node scripts/verify-schedule-access.mjs",
+    "test:admin-management": "node scripts/verify-admin-management.mjs",
+    "test:admin-validation": "node scripts/verify-admin-validation.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
