@@ -22,13 +22,8 @@ function field(form: FormData, key: string): string | null {
   return values.length === 1 && typeof values[0] === "string" ? values[0] : null;
 }
 
-/** The snapshot and active notice version must come from trusted server-side sources, never the applicant. */
-export function validateApplicationRequest(
-  form: FormData,
-  offering: OfferingSnapshot | null,
-  activeNoticeVersion: string | null,
-  now: Date,
-): ApplicationValidation {
+/** The active notice version must be supplied by a trusted server-side source. */
+export function validateApplicationInput(form: FormData, activeNoticeVersion: string | null): ApplicationValidation {
   if (!activeNoticeVersion || !notice.test(activeNoticeVersion)) return denied("notice_unavailable");
   const offeringId = field(form, "offering_id");
   const rawName = field(form, "name");
@@ -41,7 +36,19 @@ export function validateApplicationRequest(
       !contact || contact.length > 32 || !/^\+?[0-9 ()-]+$/.test(contact) ||
       contact.replace(/\D/g, "").length < 9 || contact.replace(/\D/g, "").length > 15 ||
       submittedNotice !== activeNoticeVersion || consent !== "on") return denied("invalid");
+  return { ok: true, candidate: { offeringId, name, contact, noticeVersion: activeNoticeVersion } };
+}
 
+/** The snapshot must come from a trusted server-side source, never the applicant. */
+export function validateApplicationRequest(
+  form: FormData,
+  offering: OfferingSnapshot | null,
+  activeNoticeVersion: string | null,
+  now: Date,
+): ApplicationValidation {
+  const parsed = validateApplicationInput(form, activeNoticeVersion);
+  if (!parsed.ok) return parsed;
+  const { offeringId } = parsed.candidate;
   // Until recruitment policy is approved, both boundaries are required and end is exclusive.
   if (!offering || offering.id.toLowerCase() !== offeringId.toLowerCase() || offering.isPublic !== true ||
       offering.status !== "open" || offering.coursePublicationState !== "published" ||
@@ -51,5 +58,5 @@ export function validateApplicationRequest(
   const end = Date.parse(offering.enrollmentClosesAt);
   const time = now.getTime();
   if (!Number.isFinite(start) || !Number.isFinite(end) || !Number.isFinite(time) || start >= end || time < start || time >= end) return denied("offering_unavailable");
-  return { ok: true, candidate: { offeringId, name, contact, noticeVersion: activeNoticeVersion } };
+  return parsed;
 }

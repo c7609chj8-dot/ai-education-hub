@@ -13,7 +13,8 @@
     "test:admin-validation": "node scripts/verify-admin-validation.mjs",
     "test:application-validation": "node scripts/verify-application-validation.mjs",
     "test:application-schema": "node scripts/verify-application-schema.mjs",
-    "test:application-concurrency": "node scripts/verify-application-concurrency.mjs"
+    "test:application-concurrency": "node scripts/verify-application-concurrency.mjs",
+    "test:application-submission": "node scripts/verify-application-submission.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
