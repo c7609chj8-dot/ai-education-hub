@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getPublicBrand } from "@/lib/brand/public";
 import { siteConfig } from "@/config/site";
 import { EducationIntro } from "./education-intro";
 import { HomePreviews } from "@/components/home-previews";
@@ -10,7 +11,8 @@ const learningValues = [
   { title: "삶과 일에 이어지는 결과", description: "배운 내용을 생활과 업무에 적용할 수 있는 결과물로 정리합니다." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const {brand} = await getPublicBrand();
   return (
     <>
       <section className="bg-surface">
@@ -18,7 +20,7 @@ export default function Home() {
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">모두를 위한 AI 교육</p>
             <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">
-              {siteConfig.slogan}
+              {brand.slogan}
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">{siteConfig.description}</p>
             <p className="mt-3 max-w-lg leading-relaxed text-muted">
