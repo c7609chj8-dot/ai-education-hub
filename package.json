@@ -15,7 +15,9 @@
     "test:application-schema": "node scripts/verify-application-schema.mjs",
     "test:application-concurrency": "node scripts/verify-application-concurrency.mjs",
     "test:application-submission": "node scripts/verify-application-submission.mjs",
-    "test:admin-applications": "node scripts/verify-admin-applications.mjs"
+    "test:admin-applications": "node scripts/verify-admin-applications.mjs",
+    "test:inquiry-database": "node scripts/verify-inquiry-database.mjs",
+    "test:inquiry-services": "node scripts/verify-inquiry-services.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
