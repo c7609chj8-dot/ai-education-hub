@@ -63,7 +63,7 @@ BEGIN
      v_opens IS NULL OR v_closes IS NULL OR v_opens >= v_closes OR v_now < v_opens OR v_now >= v_closes THEN
     RETURN 'unavailable';
   END IF;
-  SELECT count(*) INTO v_count FROM academy.applications WHERE offering_id=p_offering_id AND status='received';
+  SELECT count(*) INTO v_count FROM academy.applications WHERE offering_id=p_offering_id AND status IN ('received','reviewed');
   IF v_count >= v_capacity OR EXISTS (
     SELECT 1 FROM academy.application_private WHERE offering_id=p_offering_id AND applicant_name=v_name AND contact=v_contact
   ) THEN RETURN 'unavailable'; END IF;
@@ -100,7 +100,7 @@ BEGIN
   ELSE
     SELECT course_id INTO current_course FROM academy.offerings WHERE id=p_id FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'Offering not found' USING ERRCODE = 'P0002'; END IF;
-    SELECT count(*) INTO accepted_count FROM academy.applications WHERE offering_id=p_id AND status='received';
+    SELECT count(*) INTO accepted_count FROM academy.applications WHERE offering_id=p_id AND status IN ('received','reviewed');
     IF p_capacity < accepted_count OR (accepted_count > 0 AND current_course <> p_course_id) THEN
       RAISE EXCEPTION 'Offering conflicts with existing applications' USING ERRCODE = '22023';
     END IF;

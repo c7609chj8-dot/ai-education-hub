@@ -42,7 +42,7 @@ try {
   await instance.initialise(); startAttempted = true; await instance.start();
   const owner = await open(), first = await open(), second = await open();
   await owner.query("CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS");
-  for (const file of ["supabase/migrations/20261107100302_academy_course_foundation.sql","supabase/drafts/day08_public_courses.sql","supabase/drafts/day09_public_offerings.sql","supabase/drafts/day10_admin_management.sql","supabase/drafts/day11_application_data.sql","supabase/drafts/day12_atomic_applications.sql"]) await owner.query(await sql(file));
+  for (const file of ["supabase/migrations/20261107100302_academy_course_foundation.sql","supabase/drafts/day08_public_courses.sql","supabase/drafts/day09_public_offerings.sql","supabase/drafts/day10_admin_management.sql","supabase/drafts/day11_application_data.sql","supabase/drafts/day12_atomic_applications.sql","supabase/drafts/day14_admin_applications.sql"]) await owner.query(await sql(file));
   const acl = await owner.query("SELECT has_function_privilege('anon','public.academy_submit_application(uuid,uuid,text,text,text)','EXECUTE') AS anon,has_function_privilege('authenticated','public.academy_submit_application(uuid,uuid,text,text,text)','EXECUTE') AS authenticated,has_function_privilege('service_role','public.academy_submit_application(uuid,uuid,text,text,text)','EXECUTE') AS service,prosecdef FROM pg_proc WHERE oid='public.academy_submit_application(uuid,uuid,text,text,text)'::regprocedure");
   assert.deepEqual(acl.rows[0], { anon:false, authenticated:false, service:true, prosecdef:false });
   for (const role of ["anon","authenticated"]) {
@@ -125,6 +125,54 @@ try {
   await assert.rejects(owner.query("INSERT INTO academy.application_private(application_id,offering_id,applicant_name,contact) VALUES ($1,$2,'Fictional C','01000000003')",[unpaired,dup]),/duplicate key/);
   await owner.query("DELETE FROM academy.applications WHERE id=$1",[unpaired]);
   console.log("PASS: closed, private, invalid-window offerings are blocked; safe retry survives closure and duplicate scope is per offering");
+  const reviewSql="SELECT public.academy_admin_review_application($1::uuid,$2::uuid) AS data";
+  const searchSql="SELECT public.academy_admin_search_applications($1::text,$2::timestamptz,$3::uuid,$4::int) AS data";
+  const reviewOffer=await makeOffering(1), actor=crypto.randomUUID();
+  assert.equal((await first.query(submit,submitArgs(reviewOffer,crypto.randomUUID(),"Fictional Review","01011112222"))).rows[0].result,"accepted");
+  const application=(await owner.query("SELECT id FROM academy.applications WHERE offering_id=$1",[reviewOffer])).rows[0].id;
+  for (const role of ["anon","authenticated"]) {
+    await first.query("RESET ROLE"); await first.query(`SET ROLE ${role}`);
+    await assert.rejects(first.query(searchSql,["",null,null,21]),/permission denied/);
+    await assert.rejects(first.query(reviewSql,[application,actor]),/permission denied/);
+  }
+  await first.query("RESET ROLE; SET ROLE service_role");
+  await owner.query("REVOKE INSERT (application_id,actor_id,from_status,to_status) ON academy.application_status_events FROM service_role");
+  await assert.rejects(first.query(reviewSql,[application,actor]),/permission denied/);
+  assert.equal((await owner.query("SELECT status FROM academy.applications WHERE id=$1",[application])).rows[0].status,"received");
+  assert.equal((await owner.query("SELECT count(*)::int n FROM academy.application_status_events WHERE application_id=$1",[application])).rows[0].n,0);
+  await owner.query("GRANT INSERT (application_id,actor_id,from_status,to_status) ON academy.application_status_events TO service_role");
+  await first.query("BEGIN");
+  const reviewed=(await first.query(reviewSql,[application,actor])).rows[0].data;
+  assert.equal(reviewed.result,"reviewed"); assert.equal(reviewed.actor_id,actor);
+  assert.equal((await second.query(submit,submitArgs(reviewOffer,crypto.randomUUID(),"Fictional Other","01011112223"))).rows[0].result,"unavailable");
+  await first.query("COMMIT");
+  assert.equal((await first.query(reviewSql,[application,actor])).rows[0].data.result,"conflict");
+  assert.equal((await first.query(submit,submitArgs(reviewOffer,crypto.randomUUID(),"Fictional Other","01011112223"))).rows[0].result,"unavailable");
+  await assert.rejects(first.query(save,[reviewOffer,course,null,null,null,0,"open",true]),/conflicts with existing applications/);
+  const events=(await owner.query("SELECT actor_id,from_status,to_status FROM academy.application_status_events WHERE application_id=$1",[application])).rows;
+  assert.deepEqual(events,[{actor_id:actor,from_status:"received",to_status:"reviewed"}]);
+  const matches=(await first.query(searchSql,["Fictional Review",null,null,21])).rows[0].data.items;
+  assert.equal(matches.length,1);assert.equal(matches[0].masked_name,"F**");assert.equal(matches[0].contact_last4,"2222");
+  assert.equal(matches[0].status,"reviewed");assert.equal(matches[0].last_actor_id,actor);
+  assert.ok(!JSON.stringify(matches).includes("Fictional Review")&&!JSON.stringify(matches).includes("01011112222"));
+  assert.equal((await first.query(searchSql,["2222",null,null,21])).rows[0].data.items.length,1);
+  console.log("PASS: admin-only masked search; audited status change rolls back on audit failure and retains the reserved seat");
+  const raceOffer=await makeOffering(1);
+  assert.equal((await first.query(submit,submitArgs(raceOffer,crypto.randomUUID(),"Fictional Race","01011112224"))).rows[0].result,"accepted");
+  const raceId=(await owner.query("SELECT id FROM academy.applications WHERE offering_id=$1",[raceOffer])).rows[0].id;
+  await first.query("BEGIN"); await second.query("BEGIN");
+  assert.equal((await first.query(reviewSql,[raceId,actor])).rows[0].data.result,"reviewed");
+  const concurrentReview=second.query(reviewSql,[raceId,crypto.randomUUID()]);
+  await waitForRowLock(owner,second.processID); await first.query("COMMIT");
+  assert.equal((await concurrentReview).rows[0].data.result,"conflict"); await second.query("COMMIT");
+  assert.equal((await owner.query("SELECT count(*)::int n FROM academy.application_status_events WHERE application_id=$1",[raceId])).rows[0].n,1);
+  const pagingOffer=await makeOffering(100);
+  for (let index=0;index<25;index++) assert.equal((await first.query(submit,submitArgs(pagingOffer,crypto.randomUUID(),`Page Applicant ${index}`,String(9000000000+index)))).rows[0].result,"accepted");
+  await owner.query("UPDATE academy.applications SET created_at='2026-01-01T00:00:00Z' WHERE offering_id=$1",[pagingOffer]);
+  const page1=(await first.query(searchSql,["Page Applicant",null,null,20])).rows[0].data.items;
+  const last=page1.at(-1), page2=(await first.query(searchSql,["Page Applicant",last.created_at,last.id,20])).rows[0].data.items;
+  assert.equal(page1.length,20);assert.equal(page2.length,5);assert.equal(new Set([...page1,...page2].map((item)=>item.id)).size,25);
+  console.log("PASS: simultaneous reviews record one event and keyset paging handles equal timestamps without duplicates");
 } finally {
   for (const client of clients) await client.end().catch(()=>{});
   if (startAttempted) await instance.stop();
