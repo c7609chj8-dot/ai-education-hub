@@ -1,6 +1,6 @@
 # B-03-3: 개발용 공개 강좌 데이터 등록 준비
 
-대상: `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`. 2026-11-08 읽기 전용 점검. **예시 데이터는 등록하지 않았으며 별도 승인이 필요하다.**
+대상: `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`. 아래는 2026-11-08 등록 전 읽기 전용 점검과 계획의 이력이다. 이후 사용자의 승인에 따라 등록했으며 실제 결과는 `docs/backend-b03-3-seed-result.md`를 참조한다.
 
 ## 실제 DB 상태
 
