@@ -28,7 +28,8 @@
     "test:activity-services": "node scripts/verify-activity-services.mjs",
     "test:security-config": "node scripts/verify-security-config.mjs",
     "test:security-management": "node scripts/verify-security-management.mjs",
-    "test:security-actions": "node scripts/verify-security-actions.mjs"
+    "test:security-actions": "node scripts/verify-security-actions.mjs",
+    "test:backup-recovery": "node scripts/verify-backup-recovery.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
