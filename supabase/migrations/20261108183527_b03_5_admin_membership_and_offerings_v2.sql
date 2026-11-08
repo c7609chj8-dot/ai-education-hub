@@ -1,9 +1,10 @@
--- REVIEW ONLY. Not a migration. Do not apply alongside the insecure v1 candidate.
+-- MIGRATION CANDIDATE ONLY. No hosted DB application without separate approval.
 -- Requires a separately reviewed bootstrap of private_education.offering_admins.
 -- Caller must use a real, validated Supabase user JWT, not a service-role JWT.
 DO $preflight$
 BEGIN
   IF current_user <> 'postgres'
+     OR NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname=current_user AND (rolcreaterole OR rolsuper))
      OR to_regrole('academy_offering_executor') IS NOT NULL
      OR to_regnamespace('private_education') IS NOT NULL
      OR to_regclass('academy.courses') IS NULL
@@ -11,13 +12,19 @@ BEGIN
      OR to_regclass('public.published_offerings') IS NULL
      OR to_regclass('academy.applications') IS NOT NULL
      OR to_regclass('academy.application_private') IS NOT NULL
+     OR to_regprocedure('auth.uid()') IS NULL
+     OR NOT pg_catalog.has_schema_privilege(current_user,'auth','USAGE')
+     OR NOT pg_catalog.has_function_privilege(current_user,'auth.uid()','EXECUTE')
      OR pg_catalog.pg_has_role('anon','authenticated','MEMBER')
      OR pg_catalog.pg_has_role('service_role','authenticated','MEMBER')
      OR EXISTS (SELECT 1 FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
                 WHERE n.nspname='public' AND (p.proname LIKE 'academy_admin_save_offering%'
-                  OR p.proname LIKE 'academy_admin_offerings_catalog%'))
+                  OR p.proname LIKE 'academy_admin_offerings_catalog%' OR p.proname='academy_is_admin_v2'))
      OR pg_catalog.has_schema_privilege('service_role','academy','USAGE')
      OR pg_catalog.has_any_column_privilege('service_role','academy.offerings','INSERT,UPDATE')
+     OR EXISTS (SELECT 1 FROM (VALUES ('anon'),('authenticated'),('service_role')) AS r(role_name)
+                WHERE pg_catalog.has_table_privilege(r.role_name,'academy.offerings','INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+                   OR pg_catalog.has_any_column_privilege(r.role_name,'academy.offerings','INSERT,UPDATE,REFERENCES'))
      OR EXISTS (SELECT 1 FROM pg_catalog.pg_default_acl d CROSS JOIN LATERAL pg_catalog.aclexplode(d.defaclacl) a
                 WHERE d.defaclrole=(SELECT oid FROM pg_catalog.pg_roles WHERE rolname=current_user)
                   AND d.defaclobjtype='f' AND d.defaclnamespace IN (0,'public'::regnamespace)
@@ -37,11 +44,8 @@ REVOKE ALL ON SCHEMA private_education FROM PUBLIC, anon, authenticated, service
 CREATE TABLE private_education.offering_admins (user_id uuid PRIMARY KEY);
 ALTER TABLE private_education.offering_admins ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private_education.offering_admins FROM PUBLIC, anon, authenticated, service_role;
-GRANT SELECT ON private_education.offering_admins TO academy_offering_executor;
-CREATE POLICY offering_admin_self_lookup ON private_education.offering_admins
-  FOR SELECT TO academy_offering_executor USING (user_id = (SELECT auth.uid()));
 
-GRANT USAGE ON SCHEMA academy, auth TO academy_offering_executor;
+GRANT USAGE ON SCHEMA academy TO academy_offering_executor;
 GRANT SELECT (id,title,publication_state) ON academy.courses TO academy_offering_executor;
 GRANT SELECT (id,course_id,start_date,end_date,enrollment_opens_at,enrollment_closes_at,location,capacity,status,is_public),
       INSERT (id,course_id,start_date,end_date,enrollment_opens_at,enrollment_closes_at,location,capacity,status,is_public),
@@ -52,13 +56,23 @@ CREATE POLICY offering_executor_select ON academy.offerings FOR SELECT TO academ
 CREATE POLICY offering_executor_insert ON academy.offerings FOR INSERT TO academy_offering_executor WITH CHECK (true);
 CREATE POLICY offering_executor_update ON academy.offerings FOR UPDATE TO academy_offering_executor USING (true) WITH CHECK (true);
 
--- This private SECURITY DEFINER helper is exposed only through a public INVOKER
--- wrapper. Every helper independently checks auth.uid() and the private admin list.
+-- This narrow bridge is owned by postgres because hosted postgres cannot grant
+-- auth schema USAGE to a new role. It returns only the caller's membership.
+-- It has no dynamic SQL, arguments, writes, or access to other tables.
+CREATE FUNCTION private_education.is_admin_v2() RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $function$
+  SELECT coalesce(auth.uid() IS NOT NULL AND EXISTS
+    (SELECT 1 FROM private_education.offering_admins a WHERE a.user_id=auth.uid()),false);
+$function$;
+REVOKE ALL ON FUNCTION private_education.is_admin_v2() FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION private_education.is_admin_v2() TO authenticated,academy_offering_executor;
+
+-- The other private SECURITY DEFINER helpers use a NOLOGIN, non-BYPASSRLS
+-- owner. Each independently calls the auth.uid()-based membership check.
 CREATE FUNCTION private_education.offering_catalog_v2() RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $function$
 BEGIN
-  IF auth.uid() IS NULL OR NOT EXISTS
-    (SELECT 1 FROM private_education.offering_admins a WHERE a.user_id = auth.uid()) THEN
+  IF private_education.is_admin_v2() IS NOT TRUE THEN
     RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501';
   END IF;
   RETURN jsonb_build_object(
@@ -77,8 +91,7 @@ CREATE FUNCTION private_education.save_offering_v2(
 ) RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $function$
 DECLARE v_location text; v_parent_state text; v_id uuid; v_lock_key text;
 BEGIN
-  IF auth.uid() IS NULL OR NOT EXISTS
-    (SELECT 1 FROM private_education.offering_admins a WHERE a.user_id = auth.uid()) THEN
+  IF private_education.is_admin_v2() IS NOT TRUE THEN
     RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501';
   END IF;
   -- Enrollment capacity cannot be safely modified once application tables exist.
@@ -148,6 +161,10 @@ CREATE FUNCTION public.academy_admin_offerings_catalog_v2() RETURNS jsonb
 LANGUAGE sql SECURITY INVOKER SET search_path='' AS $function$
   SELECT private_education.offering_catalog_v2();
 $function$;
+CREATE FUNCTION public.academy_is_admin_v2() RETURNS boolean
+LANGUAGE sql SECURITY INVOKER SET search_path='' AS $function$
+  SELECT private_education.is_admin_v2();
+$function$;
 CREATE FUNCTION public.academy_admin_save_offering_v2(
   p_id uuid, p_create boolean, p_course_id uuid, p_start_date date, p_end_date date,
   p_enrollment_opens_at timestamptz, p_enrollment_closes_at timestamptz, p_location text,
@@ -157,6 +174,8 @@ CREATE FUNCTION public.academy_admin_save_offering_v2(
     p_enrollment_opens_at,p_enrollment_closes_at,p_location,p_capacity,p_status,p_is_public);
 $function$;
 REVOKE ALL ON FUNCTION public.academy_admin_offerings_catalog_v2() FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.academy_is_admin_v2() FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.academy_admin_save_offering_v2(uuid,boolean,uuid,date,date,timestamptz,timestamptz,text,integer,text,boolean) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.academy_admin_offerings_catalog_v2() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.academy_is_admin_v2() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.academy_admin_save_offering_v2(uuid,boolean,uuid,date,date,timestamptz,timestamptz,text,integer,text,boolean) TO authenticated;

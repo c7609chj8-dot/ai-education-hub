@@ -8,4 +8,4 @@ try {
 } catch (error) {
   failure=error;
 } finally { await db.close(); }
-if(failure){console.error(`FAIL: ${failure.message}`);process.exit(1);}
+if(failure){console.error(`FAIL: ${failure.stack}`);process.exit(1);}

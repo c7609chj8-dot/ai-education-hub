@@ -10,11 +10,11 @@ const compile=(file,imports,globals={})=>{
   return testModule.exports;
 };
 const actor="11111111-1111-4111-8111-111111111111", app="22222222-2222-4222-8222-222222222222", offer="33333333-3333-4333-8333-333333333333";
-let user={id:actor}, userIds=actor;
-const access=compile("src/lib/admin/access.ts",{"@/lib/supabase/verified-user":{getVerifiedUser:async()=>user}},{process:{env:new Proxy({}, {get:()=>userIds})}});
+let user={id:actor}, membership=true;
+const access=compile("src/lib/admin/access.ts",{"@/lib/supabase/server":{createAuthClient:async()=>({auth:{getUser:async()=>({data:{user},error:null})},rpc:async()=>({data:membership,error:null})})}});
 assert.equal((await access.getAdminIdentity()).access,"allowed");
-user={id:"44444444-4444-4444-8444-444444444444",user_metadata:{is_admin:true}};assert.equal((await access.getAdminIdentity()).access,"forbidden");
-user=null;assert.equal((await access.getAdminIdentity()).access,"unauthenticated");user={id:actor};userIds=actor+",bad";assert.equal((await access.getAdminIdentity()).access,"forbidden");
+user={id:"44444444-4444-4444-8444-444444444444",user_metadata:{is_admin:true}};membership=false;assert.equal((await access.getAdminIdentity()).access,"forbidden");
+user=null;assert.equal((await access.getAdminIdentity()).access,"unauthenticated");user={id:actor};assert.equal((await access.getAdminIdentity()).access,"forbidden");
 let identity={access:"allowed",userId:actor}, config={url:"https://uenvjqgylrevujdjpfed.supabase.co",publishableKey:"fixture"};
 const env={ACADEMY_ADMIN_APPLICATIONS_ENABLED:"true",SUPABASE_SECRET_KEY:"sb_secret_"+"fixture"};let creations=0,calls=[];
 const valid={id:app,offering_id:offer,created_at:"2026-11-08T01:00:00+00:00",status:"received",course_title:"Test course",start_date:null,masked_name:"F**",contact_last4:"1234",last_change_at:null,last_actor_id:null};
@@ -35,4 +35,4 @@ response={data:{items:[{...valid,masked_name:"Fictional Name"}]},error:null};ass
 response={data:{result:"reviewed",changed_at:"2026-11-08T01:00:00+00:00",actor_id:actor},error:null};result=await api.reviewAdminApplication(review());assert.equal(result.ok,true);assert.equal(calls.at(-1).args.p_actor_id,actor);
 response={data:{result:"reviewed",changed_at:"2026-11-08T01:00:00+00:00",actor_id:"44444444-4444-4444-8444-444444444444"},error:null};assert.equal((await api.reviewAdminApplication(review())).reason,"unavailable");
 response={data:{result:"conflict"},error:null};assert.equal((await api.reviewAdminApplication(review())).reason,"conflict");
-console.log("PASS: verified-admin allowlist and feature/project gates fail closed; masked contract enforced; forged audit actor ignored");
+console.log("PASS: verified Auth and DB membership, feature/project gates fail closed; masked contract enforced; forged audit actor ignored");

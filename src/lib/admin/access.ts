@@ -1,26 +1,26 @@
 import "server-only";
 
-import { getVerifiedUser } from "@/lib/supabase/verified-user";
-
-const USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-// Missing or malformed configuration fails closed; IDs are never taken from user metadata.
-function allowedAdminIds(): Set<string> {
-  const raw = process.env.ACADEMY_ADMIN_USER_IDS;
-  if (!raw?.trim()) return new Set();
-  const ids = raw.split(",").map((id) => id.trim());
-  if (ids.some((id) => !USER_ID.test(id))) return new Set();
-  return new Set(ids.map((id) => id.toLowerCase()));
-}
+import { createAuthClient } from "@/lib/supabase/server";
 
 export type AdminIdentity = { access: "allowed"; userId: string } | { access: "unauthenticated" | "forbidden" };
 
-// Return the identity from the same verified session used for the allowlist decision.
+// The verified user and the DB's current admin membership are both required.
+// An unavailable RPC never falls back to a local environment ID.
 export async function getAdminIdentity(): Promise<AdminIdentity> {
-  const user = await getVerifiedUser();
-  if (!user) return { access: "unauthenticated" };
-  if (!allowedAdminIds().has(user.id.toLowerCase())) return { access: "forbidden" };
-  return { access: "allowed", userId: user.id.toLowerCase() };
+  let client;
+  try { client = await createAuthClient(); } catch { return { access: "unauthenticated" }; }
+  if (!client) return { access: "unauthenticated" };
+  let user;
+  try {
+    const result = await client.auth.getUser();
+    if (result.error || !result.data.user) return { access: "unauthenticated" };
+    user = result.data.user;
+  } catch { return { access: "unauthenticated" }; }
+  try {
+    const result = await client.rpc("academy_is_admin_v2");
+    if (result.error || result.data !== true) return { access: "forbidden" };
+    return { access: "allowed", userId: user.id.toLowerCase() };
+  } catch { return { access: "forbidden" }; }
 }
 
 export async function getAdminAccess(): Promise<"unauthenticated" | "forbidden" | "allowed"> {
