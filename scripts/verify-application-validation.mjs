@@ -22,5 +22,12 @@ for (const changes of [{offering_id:"invalid"},{name:"   "},{name:"가".repeat(1
 const duplicated=form();duplicated.append("consent","on");assert.equal(verify(duplicated).ok,false);
 const forged=form();forged.append("status","open");forged.append("is_public","true");
 for (const changes of [{id:"22222222-2222-4222-8222-222222222222"},{isPublic:false},{status:"closed"},{status:"draft"},{coursePublicationState:"draft"},{enrollmentOpensAt:null},{enrollmentClosesAt:null},{enrollmentOpensAt:"bad"},{enrollmentClosesAt:"2026-11-06T00:00:00Z"}]) assert.equal(verify(forged,{...snapshot,...changes}).reason,"offering_unavailable");
+for (const changes of [
+  {enrollmentOpensAt:"2026-02-30T00:00:00+09:00"},
+  {enrollmentClosesAt:"2026-11-31T00:00:00+09:00"},
+  {enrollmentOpensAt:"2026-11-07T24:00:00+09:00"},
+  {enrollmentClosesAt:snapshot.enrollmentOpensAt},
+]) assert.equal(verify(form(),{...snapshot,...changes}).reason,"offering_unavailable");
+assert.equal(verify(form(), {...snapshot, enrollmentOpensAt:"2028-02-29T09:00:00+09:00", enrollmentClosesAt:"2028-03-01T09:00:00+09:00"}, "test-v1", at("2028-02-29T09:00:00+09:00")).ok, true);
 assert.equal(verify(form(),null).ok,false);assert.equal(verify(form(),snapshot,"test-v1",new Date("invalid")).ok,false);
 console.log("PASS: server validation rejects invalid, duplicated and stale inputs and unavailable offerings; recruitment time boundaries are fail-closed");
