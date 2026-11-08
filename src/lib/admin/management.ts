@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAuthConfig } from "@/lib/supabase/config";
+import { createAuthClient } from "@/lib/supabase/server";
 import { getAdminAccess } from "./access";
 import type { AdminCatalog, CourseInput, CourseState, ManagedCourse, ManagedOffering, OfferingCatalog, OfferingCourse, OfferingInput, OfferingState } from "./management-types";
 
@@ -17,6 +18,14 @@ async function authorizedClient() {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
   });
+}
+
+// Offering v2 uses the verified user's session; the database also checks its
+// independent admin list. The service secret is never used for this path.
+async function authorizedOfferingClient() {
+  if (await getAdminAccess() !== "allowed") return null;
+  if (process.env.ACADEMY_ADMIN_MANAGEMENT_ENABLED !== "true" || !getSupabaseAuthConfig()) return null;
+  return createAuthClient();
 }
 
 function course(value: unknown): ManagedCourse | null {
@@ -69,9 +78,9 @@ export async function loadAdminCatalog(): Promise<AdminCatalog | null> {
 
 export async function loadAdminOfferingCatalog(): Promise<OfferingCatalog | null> {
   try {
-    const supabase = await authorizedClient();
+    const supabase = await authorizedOfferingClient();
     if (!supabase) return null;
-    const { data, error } = await supabase.rpc("academy_admin_offerings_catalog_v1");
+    const { data, error } = await supabase.rpc("academy_admin_offerings_catalog_v2");
     if (error || !data || typeof data !== "object" || !Array.isArray(data.courses) || !Array.isArray(data.offerings)) return null;
     const courses: OfferingCourse[] = [];
     for (const row of data.courses) {
@@ -98,9 +107,9 @@ export async function saveCourse(input: CourseInput): Promise<boolean> {
 
 export async function saveOffering(input: OfferingInput): Promise<"saved" | "duplicate" | "unknown"> {
   try {
-    const supabase = await authorizedClient();
+    const supabase = await authorizedOfferingClient();
     if (!supabase) return "unknown";
-    const { data, error } = await supabase.rpc("academy_admin_save_offering_v1", { p_id: input.id, p_create: input.isNew, p_course_id: input.courseId,
+    const { data, error } = await supabase.rpc("academy_admin_save_offering_v2", { p_id: input.id, p_create: input.isNew, p_course_id: input.courseId,
       p_start_date: input.startDate, p_end_date: input.endDate, p_location: input.location, p_capacity: input.capacity,
       p_status: input.status, p_is_public: input.isPublic, p_enrollment_opens_at: input.enrollmentOpensAt,
       p_enrollment_closes_at: input.enrollmentClosesAt });

@@ -39,7 +39,7 @@ try {
   const owner=await open(),first=await open(),second=await open();
   assert.match((await owner.query("SELECT version() AS v")).rows[0].v,/PostgreSQL 17\.11/);
   await owner.query("CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS");
-  for(const file of ["supabase/migrations/20261107100302_academy_course_foundation.sql","supabase/migrations/20261108105949_public_course_catalog.sql","supabase/drafts/day08_dev_examples.sql","supabase/migrations/20261108143123_public_offerings_catalog.sql","supabase/migrations/20261108162624_admin_offering_management.sql"])await owner.query(await sql(file));
+  for(const file of ["supabase/migrations/20261107100302_academy_course_foundation.sql","supabase/migrations/20261108105949_public_course_catalog.sql","supabase/drafts/day08_dev_examples.sql","supabase/migrations/20261108143123_public_offerings_catalog.sql","supabase/drafts/b03_5_insecure_v1_do_not_apply.sql"])await owner.query(await sql(file));
   const course=(await owner.query("SELECT id FROM academy.courses WHERE slug='life-chatgpt'")).rows[0].id;
   const save="SELECT public.academy_admin_save_offering_v1($1::uuid,$2::boolean,$3::uuid,$4::date,$5::date,$6::timestamptz,$7::timestamptz,$8::text,$9::integer,$10::text,$11::boolean) AS result";
   const args=["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",true,course,"2026-12-01","2027-02-01","2026-11-01T00:00:00Z","2026-11-30T09:00:00Z","Online",20,"open",true];

@@ -1,4 +1,4 @@
--- B-03-5 review candidate. Apply only with separate approval.
+-- UNSAFE v1: historical comparison only. Never apply; service_role bypasses validation.
 -- This version is intentionally unavailable if application tables exist.
 DO $preflight$
 DECLARE r record;

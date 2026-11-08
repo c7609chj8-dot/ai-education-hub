@@ -10,7 +10,7 @@ try {
     "supabase/migrations/20261108105949_public_course_catalog.sql",
     "supabase/drafts/day08_dev_examples.sql",
     "supabase/migrations/20261108143123_public_offerings_catalog.sql",
-    "supabase/migrations/20261108162624_admin_offering_management.sql",
+    "supabase/drafts/b03_5_insecure_v1_do_not_apply.sql",
   ]) await db.exec(await readFile(file,"utf8"));
   const id=(await db.query("SELECT id FROM academy.courses WHERE slug='life-chatgpt'")).rows[0].id;
   await db.exec("SET ROLE service_role");

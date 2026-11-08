@@ -1,5 +1,7 @@
 # B-03-5 Auth·서비스 권한 재검수
 
+> 후속 검토: v1은 위험한 미적용 초안으로 이동했다. v2 후보와 최신 빌드·보안 검증 상태는 `docs/backend-b03-5-rpc-security-v2.md`를 참고한다.
+
 점검일: 2026-11-09 (Asia/Seoul). 개발 프로젝트 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`만 읽기 전용으로 확인했다. 관리자 RPC 적용은 보류 중이며 이 문서는 적용 승인이 아니다.
 
 ## 실제 로그인과 관리자 ID
