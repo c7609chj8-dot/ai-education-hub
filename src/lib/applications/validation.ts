@@ -14,8 +14,15 @@ export type ApplicationValidation = { ok: true; candidate: ApplicationCandidate 
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const notice = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-const timestamp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
+const timestamp = /^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
 const denied = (reason: "invalid" | "notice_unavailable" | "offering_unavailable"): ApplicationValidation => ({ ok: false, reason });
+
+function validTimestamp(value: string): boolean {
+  const match = timestamp.exec(value);
+  if (!match) return false;
+  const day = new Date(`${match[1]}T00:00:00.000Z`);
+  return Number.isFinite(day.getTime()) && day.toISOString().slice(0, 10) === match[1];
+}
 
 function field(form: FormData, key: string): string | null {
   const values = form.getAll(key);
@@ -53,7 +60,7 @@ export function validateApplicationRequest(
   if (!offering || offering.id.toLowerCase() !== offeringId.toLowerCase() || offering.isPublic !== true ||
       offering.status !== "open" || offering.coursePublicationState !== "published" ||
       !offering.enrollmentOpensAt || !offering.enrollmentClosesAt ||
-      !timestamp.test(offering.enrollmentOpensAt) || !timestamp.test(offering.enrollmentClosesAt)) return denied("offering_unavailable");
+      !validTimestamp(offering.enrollmentOpensAt) || !validTimestamp(offering.enrollmentClosesAt)) return denied("offering_unavailable");
   const start = Date.parse(offering.enrollmentOpensAt);
   const end = Date.parse(offering.enrollmentClosesAt);
   const time = now.getTime();

@@ -11,6 +11,7 @@
     "test:public-course-migration": "node scripts/verify-public-course-migration.mjs",
     "test:public-course-postgres": "node scripts/verify-public-course-postgres.mjs",
     "test:public-course-service": "node scripts/verify-public-course-service.mjs",
+    "test:public-offerings-migration": "node scripts/verify-public-offerings-migration.mjs",
     "test:schedule-access": "node scripts/verify-schedule-access.mjs",
     "test:admin-management": "node scripts/verify-admin-management.mjs",
     "test:admin-validation": "node scripts/verify-admin-validation.mjs",
