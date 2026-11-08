@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAuthConfig } from "@/lib/supabase/config";
 import { getAdminAccess } from "./access";
-import type { AdminCatalog, CourseInput, CourseState, ManagedCourse, ManagedOffering, OfferingInput, OfferingState } from "./management-types";
+import type { AdminCatalog, CourseInput, CourseState, ManagedCourse, ManagedOffering, OfferingCatalog, OfferingCourse, OfferingInput, OfferingState } from "./management-types";
 
 // Secret client creation is gated here too, so every data access rechecks the user.
 async function authorizedClient() {
@@ -33,7 +33,7 @@ function course(value: unknown): ManagedCourse | null {
     durationHours: row.duration_hours as number | null, objectives: row.objectives as string[], publicationState: row.publication_state as CourseState };
 }
 
-function offering(value: unknown): ManagedOffering | null {
+function offering(value: unknown, requireWindows = false): ManagedOffering | null {
   if (!value || typeof value !== "object") return null;
   const row = value as Record<string, unknown>;
   if (typeof row.id !== "string" || typeof row.course_id !== "string" ||
@@ -41,7 +41,16 @@ function offering(value: unknown): ManagedOffering | null {
       !(row.location === null || typeof row.location === "string") || !Number.isInteger(row.capacity) || (row.capacity as number) < 0 ||
       typeof row.status !== "string" || !["draft", "scheduled", "open", "closed", "finished", "cancelled"].includes(row.status) ||
       typeof row.is_public !== "boolean") return null;
+  const opens = row.enrollment_opens_at;
+  const closes = row.enrollment_closes_at;
+  if (requireWindows && (opens === undefined || closes === undefined)) return null;
+  for (const instant of [opens, closes]) {
+    if (instant !== null && instant !== undefined &&
+        (typeof instant !== "string" || !/(?:Z|[+-]\d{2}:\d{2})$/.test(instant) ||
+         !Number.isFinite(Date.parse(instant)) || /\.\d*[1-9]\d*(?:Z|[+-]\d{2}:\d{2})$/.test(instant))) return null;
+  }
   return { id: row.id, courseId: row.course_id, startDate: row.start_date as string | null, endDate: row.end_date as string | null,
+    enrollmentOpensAt: (opens ?? null) as string | null, enrollmentClosesAt: (closes ?? null) as string | null,
     location: row.location as string | null, capacity: row.capacity as number, status: row.status as OfferingState, isPublic: row.is_public };
 }
 
@@ -52,9 +61,27 @@ export async function loadAdminCatalog(): Promise<AdminCatalog | null> {
     const { data, error } = await supabase.rpc("academy_admin_catalog");
     if (error || !data || typeof data !== "object" || !Array.isArray(data.courses) || !Array.isArray(data.offerings)) return null;
     const courses = data.courses.map(course);
-    const offerings = data.offerings.map(offering);
+    const offerings = data.offerings.map((item: unknown) => offering(item));
     if (courses.some((item: ManagedCourse | null) => !item) || offerings.some((item: ManagedOffering | null) => !item)) return null;
     return { courses: courses as ManagedCourse[], offerings: offerings as ManagedOffering[] };
+  } catch { return null; }
+}
+
+export async function loadAdminOfferingCatalog(): Promise<OfferingCatalog | null> {
+  try {
+    const supabase = await authorizedClient();
+    if (!supabase) return null;
+    const { data, error } = await supabase.rpc("academy_admin_offerings_catalog_v1");
+    if (error || !data || typeof data !== "object" || !Array.isArray(data.courses) || !Array.isArray(data.offerings)) return null;
+    const courses: OfferingCourse[] = [];
+    for (const row of data.courses) {
+      if (!row || typeof row.id !== "string" || typeof row.title !== "string" ||
+          !["draft", "published", "archived"].includes(row.publication_state)) return null;
+      courses.push({ id: row.id, title: row.title, publicationState: row.publication_state as CourseState });
+    }
+    const offerings = data.offerings.map((item: unknown) => offering(item, true));
+    if (offerings.some((item: ManagedOffering | null) => !item)) return null;
+    return { courses, offerings: offerings as ManagedOffering[] };
   } catch { return null; }
 }
 
@@ -69,13 +96,15 @@ export async function saveCourse(input: CourseInput): Promise<boolean> {
   } catch { return false; }
 }
 
-export async function saveOffering(input: OfferingInput): Promise<boolean> {
+export async function saveOffering(input: OfferingInput): Promise<"saved" | "duplicate" | "unknown"> {
   try {
     const supabase = await authorizedClient();
-    if (!supabase) return false;
-    const { error } = await supabase.rpc("academy_admin_save_offering", { p_id: input.id, p_course_id: input.courseId,
+    if (!supabase) return "unknown";
+    const { data, error } = await supabase.rpc("academy_admin_save_offering_v1", { p_id: input.id, p_create: input.isNew, p_course_id: input.courseId,
       p_start_date: input.startDate, p_end_date: input.endDate, p_location: input.location, p_capacity: input.capacity,
-      p_status: input.status, p_is_public: input.isPublic });
-    return !error;
-  } catch { return false; }
+      p_status: input.status, p_is_public: input.isPublic, p_enrollment_opens_at: input.enrollmentOpensAt,
+      p_enrollment_closes_at: input.enrollmentClosesAt });
+    if (error) return "unknown";
+    return data === "saved" || data === "duplicate" ? data : "unknown";
+  } catch { return "unknown"; }
 }

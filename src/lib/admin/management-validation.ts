@@ -1,4 +1,5 @@
 import type { CourseInput, CourseState, FormResult, OfferingInput, OfferingState } from "./management-types";
+import { seoulInputToIso } from "./seoul-time";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const COURSE_STATES = ["draft", "published", "archived"] as const;
@@ -49,20 +50,29 @@ export function parseCourseForm(form: FormData): FormResult<CourseInput> {
 }
 
 export function parseOfferingForm(form: FormData): FormResult<OfferingInput> {
-  const id = optionalId(field(form, "id"));
+  const id = field(form, "id");
+  const mode = field(form, "mode");
   const courseId = field(form, "course_id");
   const startDate = date(field(form, "start_date"));
   const endDate = date(field(form, "end_date"));
+  const enrollmentOpensAt = seoulInputToIso(field(form, "enrollment_opens_at"));
+  const enrollmentClosesAt = seoulInputToIso(field(form, "enrollment_closes_at"));
   const rawLocation = field(form, "location");
   const capacity = integer(field(form, "capacity"), 0);
   const status = field(form, "status");
   const visibility = form.getAll("is_public");
-  if (id === undefined || !courseId || !UUID.test(courseId) || startDate === undefined || endDate === undefined ||
+  if (!id || !UUID.test(id) || (mode !== "create" && mode !== "update") ||
+      !courseId || !UUID.test(courseId) || startDate === undefined || endDate === undefined ||
+      enrollmentOpensAt === undefined || enrollmentClosesAt === undefined ||
+      ((enrollmentOpensAt === null) !== (enrollmentClosesAt === null)) ||
+      (enrollmentOpensAt !== null && enrollmentClosesAt !== null && enrollmentOpensAt >= enrollmentClosesAt) ||
       (startDate && endDate && endDate < startDate) || rawLocation === null || rawLocation.trim().length > 500 ||
       capacity === undefined || !status || !OFFERING_STATES.includes(status as OfferingState) ||
       visibility.length > 1 || (visibility.length === 1 && visibility[0] !== "on")) return invalid;
   const isPublic = visibility.length === 1;
   if (isPublic && status === "draft") return { ok: false, error: "작성 중인 기수는 공개할 수 없습니다." };
-  return { ok: true, value: { id, courseId, startDate, endDate, location: rawLocation.trim() || null,
-    capacity, status: status as OfferingState, isPublic } };
+  if ((isPublic || status !== "draft") && (!startDate || !endDate || !enrollmentOpensAt || !enrollmentClosesAt)) return { ok: false, error: "교육일과 모집기간을 모두 입력해 주세요." };
+  if (status === "open" && capacity === 0) return { ok: false, error: "모집 중인 기수의 정원은 1명 이상이어야 합니다." };
+  return { ok: true, value: { id, isNew: mode === "create", courseId, startDate, endDate, enrollmentOpensAt, enrollmentClosesAt,
+    location: rawLocation.trim() || null, capacity, status: status as OfferingState, isPublic } };
 }
