@@ -29,7 +29,8 @@
     "test:security-config": "node scripts/verify-security-config.mjs",
     "test:security-management": "node scripts/verify-security-management.mjs",
     "test:security-actions": "node scripts/verify-security-actions.mjs",
-    "test:backup-recovery": "node scripts/verify-backup-recovery.mjs"
+    "test:backup-recovery": "node scripts/verify-backup-recovery.mjs",
+    "test:migration-rehearsal": "node scripts/verify-migration-rehearsal.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
