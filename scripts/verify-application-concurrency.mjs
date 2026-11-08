@@ -14,6 +14,8 @@ if (!moduleRoot) throw Error("Set DAY12_PG_MODULE_ROOT to an isolated folder wit
 const load = createRequire(path.join(path.resolve(moduleRoot), "package.json"));
 const { default: EmbeddedPostgres } = await import(pathToFileURL(load.resolve("embedded-postgres")).href);
 const { Client } = load("pg");
+const embeddedRequire = createRequire(load.resolve("embedded-postgres"));
+const { gracefulExit } = await import(pathToFileURL(embeddedRequire.resolve("exit-hook")).href);
 const reservePort = () => new Promise((resolve, reject) => { const server = net.createServer(); server.on("error", reject); server.listen(0, "127.0.0.1", () => { const port = server.address().port; server.close((err) => err ? reject(err) : resolve(port)); }); });
 const tempRoot = path.resolve(os.tmpdir());
 const fixtureDir = await fs.mkdtemp(path.join(tempRoot, "academy-day12-"));
@@ -51,6 +53,13 @@ try {
     await first.query("RESET ROLE");
   }
   const course=(await owner.query("INSERT INTO academy.courses(slug,title,category,summary,audience,result_artifact,publication_state) VALUES ('fictional','Fictional','Test','Test','Test','Test','published') RETURNING id")).rows[0].id;
+  await owner.query("INSERT INTO academy.course_weeks(course_id,week_number,title) SELECT $1,n,'Fictional week '||n FROM generate_series(1,12) n",[course]);
+  await owner.query("INSERT INTO academy.courses(slug,title,category,summary,audience,result_artifact,publication_state) VALUES ('hidden-fixture','Private fixture','Test','Test','Test','Test','draft')");
+  await owner.query("SET ROLE anon");
+  const visibleCourses=(await owner.query("SELECT slug FROM public.published_courses ORDER BY slug")).rows;
+  assert.deepEqual(visibleCourses,[{slug:"fictional"}]);
+  assert.equal((await owner.query("SELECT count(*)::int n FROM public.published_course_weeks WHERE course_id=$1",[course])).rows[0].n,12);
+  await owner.query("RESET ROLE");
   const makeOffering = async (capacity) => (await owner.query("INSERT INTO academy.offerings(course_id,capacity,status,is_public,enrollment_opens_at,enrollment_closes_at) VALUES ($1,$2,'open',true,now()-interval '1 hour',now()+interval '1 hour') RETURNING id",[course,capacity])).rows[0].id;
   const count = async (id) => Number((await owner.query("SELECT count(*) AS n FROM academy.applications WHERE offering_id=$1",[id])).rows[0].n);
   await first.query("SET ROLE service_role"); await second.query("SET ROLE service_role");
@@ -128,6 +137,9 @@ try {
   const reviewSql="SELECT public.academy_admin_review_application($1::uuid,$2::uuid) AS data";
   const searchSql="SELECT public.academy_admin_search_applications($1::text,$2::timestamptz,$3::uuid,$4::int) AS data";
   const reviewOffer=await makeOffering(1), actor=crypto.randomUUID();
+  await owner.query("SET ROLE anon");
+  assert.equal((await owner.query("SELECT count(*)::int n FROM public.published_offerings WHERE id=$1",[reviewOffer])).rows[0].n,1);
+  await owner.query("RESET ROLE");
   assert.equal((await first.query(submit,submitArgs(reviewOffer,crypto.randomUUID(),"Fictional Review","01011112222"))).rows[0].result,"accepted");
   const application=(await owner.query("SELECT id FROM academy.applications WHERE offering_id=$1",[reviewOffer])).rows[0].id;
   for (const role of ["anon","authenticated"]) {
@@ -179,3 +191,6 @@ try {
   const target=path.resolve(fixtureDir);
   if (path.dirname(target) === tempRoot && path.basename(target).startsWith("academy-day12-")) await fs.rm(target,{recursive:true,force:true,maxRetries:30,retryDelay:300});
 }
+
+// The isolated cluster is already stopped and removed; run the package shutdown hook on Windows.
+gracefulExit(0);
