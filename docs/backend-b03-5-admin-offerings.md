@@ -2,7 +2,7 @@
 
 2026-11-09 점검. 기준 PR #27 / `869e49f814c9ef0bd7960cd6423d0e79042e35a2`. 대상 개발 DB는 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`. **관리자 RPC·권한은 실제 DB에 적용하지 않았다.**
 
-후속 보안 검토: 현재 후보는 `service_role`의 직접 테이블 쓰기로 RPC 검증을 우회할 수 있다. 격리 DB에서 구체적으로 재현했으며 실제 Auth 로그인도 아직 검증되지 않았다. 적용 전 `docs/backend-b03-5-auth-security-review.md`를 먼저 확인한다.
+후속 보안 검토: 현재 후보는 `service_role`의 직접 테이블 쓰기로 RPC 검증을 우회할 수 있다. 격리 DB에서 구체적으로 재현했다. 실제 Auth 계정 1개의 허용목록 미포함·포함 검사는 완료했으며 적용 전 `docs/backend-b03-5-auth-security-review.md`를 먼저 확인한다.
 
 ## B-03-4 실제 적용 확인
 
@@ -45,7 +45,7 @@
 | 회귀 | 공개 기수 RLS, 관리자 인증/액션, 신청 검증, TypeScript 및 ESLint 검사 통과 |
 | 로컬 페이지 | Webpack 빌드 기반, 인증 설정 없는 환경에서 홈페이지·일정·관리자 로그인 HTTP 200, 관리자 기수 페이지는 로그인으로 307. 실제 로그인·DB 연결 화면 검증은 아님 |
 
-개발 프로젝트의 테스트 사용자 1명을 확인했다. 실제 Supabase 로그인, 관리자 허용 ID, JWT 및 서비스 키를 이용한 등록·수정은 별도 검증이 필요하다. 비밀번호·토큰은 채팅이나 Git에 넣지 않는다. [Supabase 사용자 안내](https://supabase.com/docs/guides/auth/users)
+개발 프로젝트의 테스트 사용자 1명으로 실제 로그인하고 같은 계정의 허용목록 미포함 시 403, 포함 시 200을 확인했다. 별도의 일반 사용자 계정, 실제 로그아웃, 서비스 키를 이용한 등록·수정은 미검증이다. 비밀번호·토큰은 채팅이나 Git에 넣지 않는다. [Supabase 사용자 안내](https://supabase.com/docs/guides/auth/users)
 
 ## 빌드와 Tailwind
 
