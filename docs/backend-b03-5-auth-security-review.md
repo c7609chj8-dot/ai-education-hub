@@ -4,7 +4,7 @@
 
 ## 실제 로그인과 관리자 ID
 
-- 사용자는 테스트 계정을 만들었다고 알려주었으나, 점검 시 해당 프로젝트의 `auth.users`는 두 차례 모두 0건이었다. 프로젝트 선택 또는 계정 생성 상태를 확인 중이며 이메일·ID·비밀번호는 조회하지 않았다. **실제 로그인과 실제 일반 사용자 JWT의 관리자 차단은 미검증**이다.
+- 계정 생성 직후 두 차례 조회에서는 `auth.users`가 0건이었으나, 이후 같은 개발 프로젝트에서 테스트 계정 1건을 확인했다. 실제 로그인과 허용목록 포함·미포함에 따른 접근 차단은 별도로 검증해야 한다. 이메일·비밀번호·토큰을 문서에 기록하지 않는다.
 - 코드의 `getVerifiedUser()`는 서버에서 Supabase Auth의 `getUser()` 결과를 확인한다. `getAdminIdentity()`는 그 사용자 ID와 서버 전용 `ACADEMY_ADMIN_USER_IDS`를 비교한다. 비어 있거나 잘못된 목록은 실패 차단되며 사용자 메타데이터는 관리자 권한에 사용하지 않는다. 서버 액션과 특권 클라이언트는 각각 관리자 접근을 확인한다.
 - `npm run test:admin-auth-gates`의 가짜 Auth 응답으로 미인증 401, 허용목록에 없는 사용자 403, 목록에 든 사용자 200, 오류·위조 메타데이터·잘못된 목록의 실패 차단을 확인했다. 이는 실제 로그인 결과가 아니다. 기존 서비스·액션 모의 검사도 통과했다.
 - 로컬 Webpack 서버의 비인증 `/api/admin/access`는 401이고 관리자 기수 페이지는 로그인으로 307이었다. 실제 Supabase 로그인이나 인증된 사용자에 대한 검사는 아니다.
@@ -25,7 +25,7 @@
 
 ## 실제 DB와 후보 SQL 차이
 
-현재 실제 개발 DB는 마이그레이션 4건, 강좌 5개·60주, 기수 0개이고 관리자 함수는 없다. `academy.courses`와 `academy.offerings`의 RLS가 활성화돼 있으며 기존 공개 정책·invoker 뷰가 유지된다. `anon`·`authenticated`에는 기수 쓰기 권한이 없고, 현재 `service_role`에도 `academy` USAGE 또는 기수 쓰기 권한이 없다. 신청 테이블과 충돌 관리자 함수도 없다. Security Advisor 결과는 0건이다.
+현재 실제 개발 DB는 마이그레이션 4건, 강좌 5개·60주, 기수 0개이고 관리자 함수는 없다. `academy.courses`와 `academy.offerings`의 RLS가 활성화돼 있으며 기존 공개 정책·invoker 뷰가 유지된다. `anon`·`authenticated`에는 기수 쓰기 권한이 없고, 현재 `service_role`에도 `academy` USAGE 또는 기수 쓰기 권한이 없다. 신청 테이블과 충돌 관리자 함수도 없다. 계정 생성 이후 Security Advisor에 유출 비밀번호 보호가 비활성화된 `auth_leaked_password_protection` WARN 1건이 표시됐다. 설정은 변경하지 않았으며 별도 검토가 필요하다.
 
 미적용 `20261108162624_admin_offering_management.sql`의 정규화 SHA-256은 `16de60a8b7c67dc91f063bbcff0bc2b0813850d0a4f295af34c9e769e69925ab`로 검토 후보와 같다. 이 후보는 invoker 함수 2개, 서비스 역할의 `academy` USAGE, 강좌 3개 열 SELECT와 기수 지정 열 SELECT·INSERT·UPDATE를 제안한다. 익명·인증 역할의 함수 EXECUTE는 막는다. 사용자별 관리자 인가는 DB가 아니라 서버에서 수행된다.
 
