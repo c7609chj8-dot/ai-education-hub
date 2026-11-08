@@ -45,7 +45,7 @@
 | 회귀 | 공개 기수 RLS, 관리자 인증/액션, 신청 검증, TypeScript 및 ESLint 검사 통과 |
 | 로컬 페이지 | Webpack 빌드 기반, 인증 설정 없는 환경에서 홈페이지·일정·관리자 로그인 HTTP 200, 관리자 기수 페이지는 로그인으로 307. 실제 로그인·DB 연결 화면 검증은 아님 |
 
-실제 개발 DB에 테스트 사용자가 없어 실제 Supabase 로그인, 관리자 허용 ID, JWT 및 서비스 키를 이용한 등록·수정은 미검증이다. 대시보드 `Authentication → Users → Add user`에서 개발용 사용자 또는 초대를 준비할 수 있다. 비밀번호·토큰은 채팅이나 Git에 넣지 않는다. 준비 후에만 개발 서버의 서버 전용 `ACADEMY_ADMIN_USER_IDS`와 키 설정을 확인한다. [Supabase 사용자 안내](https://supabase.com/docs/guides/auth/users)
+개발 프로젝트의 테스트 사용자 1명을 확인했다. 실제 Supabase 로그인, 관리자 허용 ID, JWT 및 서비스 키를 이용한 등록·수정은 별도 검증이 필요하다. 비밀번호·토큰은 채팅이나 Git에 넣지 않는다. [Supabase 사용자 안내](https://supabase.com/docs/guides/auth/users)
 
 ## 빌드와 Tailwind
 
