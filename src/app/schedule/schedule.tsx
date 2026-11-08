@@ -155,7 +155,7 @@ function ScheduleCalendar({ offerings, courseTitle, example }: { offerings: Sche
                             {count ? (
                               <button
                                 type="button"
-                                aria-label={`${formatDate(date)}, ${example ? "예시 " : ""}일정 ${count}개`}
+                                aria-label={`${day} (${formatDate(date)}), ${example ? "예시 " : ""}일정 ${count}개`}
                                 aria-pressed={date === selectedDay}
                                 onClick={() => setSelectedDay(date)}
                                 className="calendar-day calendar-day--event"
@@ -164,7 +164,7 @@ function ScheduleCalendar({ offerings, courseTitle, example }: { offerings: Sche
                                 <span aria-hidden="true" className="calendar-dot" />
                               </button>
                             ) : (
-                              <span className="calendar-day" aria-label={formatDate(date)}>{day}</span>
+                              <time className="calendar-day" dateTime={date}><span className="sr-only">{formatDate(date)}</span><span aria-hidden="true">{day}</span></time>
                             )}
                           </td>
                         );
