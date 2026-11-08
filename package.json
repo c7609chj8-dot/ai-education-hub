@@ -18,6 +18,8 @@
     "test:admin-offering-services": "node scripts/verify-admin-offering-services.mjs",
     "test:admin-offering-form": "node scripts/verify-admin-offering-form.mjs",
     "test:admin-offering-concurrency": "node scripts/verify-admin-offering-concurrency.mjs",
+    "test:admin-offering-privilege-boundary": "node scripts/verify-admin-offering-privilege-boundary.mjs",
+    "test:admin-auth-gates": "node scripts/verify-admin-auth-gates.mjs",
     "test:admin-validation": "node scripts/verify-admin-validation.mjs",
     "test:application-validation": "node scripts/verify-application-validation.mjs",
     "test:application-schema": "node scripts/verify-application-schema.mjs",

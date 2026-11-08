@@ -2,6 +2,8 @@
 
 2026-11-09 점검. 기준 PR #27 / `869e49f814c9ef0bd7960cd6423d0e79042e35a2`. 대상 개발 DB는 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`. **관리자 RPC·권한은 실제 DB에 적용하지 않았다.**
 
+후속 보안 검토: 현재 후보는 `service_role`의 직접 테이블 쓰기로 RPC 검증을 우회할 수 있다. 격리 DB에서 구체적으로 재현했으며 실제 Auth 로그인도 아직 검증되지 않았다. 적용 전 `docs/backend-b03-5-auth-security-review.md`를 먼저 확인한다.
+
 ## B-03-4 실제 적용 확인
 
 개발 DB에 기존 4건의 이력과 `20261108143123_public_offerings_catalog`, `is_public`, 공개 SELECT 정책 및 `security_invoker=true` 뷰가 존재한다. 이력에 분리 저장된 7개 SQL 문장은 주석·공백·세미콜론 제거 후 Git 후보와 일치했다. 바이트 단위 일치나 적용 당시 dry-run/실행 로그는 확인하지 않았다. 실제 익명 API는 강좌 5개·주차 60개·일정 0개를 각각 HTTP 200으로 반환했다. `anon`·`authenticated`의 기수 쓰기 권한은 카탈로그상 없고 Security Advisor 결과는 0건이었다. PR #27 설명에도 사후 확인을 기록했다.
