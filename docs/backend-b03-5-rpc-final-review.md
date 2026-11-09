@@ -4,6 +4,8 @@
 
 ## 현재 적용 상태
 
+실제 JWT·RPC 보안검증 결과와 저장·회수 시험 계획은 [별도 검증 보고서](backend-b03-5-real-jwt-security.md)에 기록한다.
+
 - 사용자가 조건부 승인한 후 Session Pooler 경로로 `20261108183527_b03_5_admin_membership_and_offerings_v2`를 적용했다. 실제 개발 DB의 이력에서 동일 버전·이름과 38개 기록 문장을 확인했다. Git 후보 파일의 버전과 일치한다.
 - `private_education.offering_admins`는 RLS가 켜져 있고 별도 승인된 관리자 행은 1개다. 기존 강좌 5개·주차 60개·기수 0개와 개발 Auth 테스트 사용자, `ensure_rls` 이벤트 트리거 활성 상태가 유지된다.
 - 새 전용 역할은 NOLOGIN·NOINHERIT·NOBYPASSRLS이며 anon·authenticated·service_role·authenticator는 해당 역할의 멤버가 아니다. 관리자 목록 직접 SELECT·쓰기와 기수 직접 쓰기는 이 API 역할들에 허용되지 않는다. 전용 역할만 필요한 기수 열 쓰기와 전용 RLS 정책을 받는다.
