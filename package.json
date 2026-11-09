@@ -15,6 +15,8 @@
     "test:schedule-access": "node scripts/verify-schedule-access.mjs",
     "test:admin-management": "node scripts/verify-admin-management.mjs",
     "test:admin-offerings-v1": "node scripts/verify-admin-offerings-v1.mjs",
+    "test:admin-offerings-v2": "node scripts/verify-admin-offerings-v2-pglite.mjs",
+    "test:admin-offerings-v2-postgres": "node scripts/verify-admin-offerings-v2-postgres.mjs",
     "test:admin-offering-services": "node scripts/verify-admin-offering-services.mjs",
     "test:admin-offering-form": "node scripts/verify-admin-offering-form.mjs",
     "test:admin-offering-concurrency": "node scripts/verify-admin-offering-concurrency.mjs",

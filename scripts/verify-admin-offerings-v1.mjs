@@ -10,7 +10,7 @@ const files = [
   "supabase/drafts/day08_dev_examples.sql",
   "supabase/migrations/20261108143123_public_offerings_catalog.sql",
 ];
-const candidate = await read("supabase/migrations/20261108162624_admin_offering_management.sql");
+const candidate = await read("supabase/drafts/b03_5_insecure_v1_do_not_apply.sql");
 async function fresh() {
   const db = new PGlite();
   await db.exec("CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS");

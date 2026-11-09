@@ -1,5 +1,7 @@
 # B-03-5 관리자 교육일정 저장 후보
 
+> 후속 보안 검토: 이 문서의 v1 SQL 경로·서비스 키 설명은 당시 기록이다. v1은 직접 쓰기 우회가 재현돼 migration 경로에서 제거하고 `supabase/drafts/b03_5_insecure_v1_do_not_apply.sql`로 보관한다. v2 검토 및 미해결 조건은 `docs/backend-b03-5-rpc-security-v2.md`를 따른다.
+
 2026-11-09 점검. 기준 PR #27 / `869e49f814c9ef0bd7960cd6423d0e79042e35a2`. 대상 개발 DB는 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`. **관리자 RPC·권한은 실제 DB에 적용하지 않았다.**
 
 후속 보안 검토: 현재 후보는 `service_role`의 직접 테이블 쓰기로 RPC 검증을 우회할 수 있다. 격리 DB에서 구체적으로 재현했다. 실제 Auth 계정 1개의 허용목록 미포함·포함 검사는 완료했으며 적용 전 `docs/backend-b03-5-auth-security-review.md`를 먼저 확인한다.
