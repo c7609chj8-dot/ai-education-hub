@@ -26,7 +26,10 @@
 - 격리 서버에서 event trigger 생성은 PostgreSQL 슈퍼유저가 해야 하므로, 트리거 **함수** 소유자는 `postgres`로 맞췄지만 트리거 객체 소유자는 격리 슈퍼유저다. 실제 DB의 트리거 객체 소유자는 `postgres`다. 호스팅 전체 권한·확장·서비스 구성을 동일하게 복제했다고 주장하지 않는다.
 - 격리 `auth.uid()`는 가상 claim을 사용한다. JWT 서명 검증기나 PostgREST를 실행하지 않았다. 실제 일반 사용자 JWT의 직접 RPC 거부, 실제 관리자 JWT로 v2 조회·저장·회수, 호스팅 DDL 실행 및 Security Advisor 적용 후 검사는 **미검증**이다.
 - 실제 로그인된 사용자는 새 코드 테스트 서버에서 DB RPC 부재로 안전하게 거부됐다. 기존 홈페이지 서버는 그대로 유지돼 같은 세션의 관리자 콘솔이 열렸다. PC·모바일에서 기존 콘솔과 새 로그인 화면을 보았으며 새 코드의 허용된 관리자 콘솔은 DB 미적용으로 미검증이다.
-- 현재 실제 개발 DB: 기존 이력 4건, 강좌 5개·주차 60개·기수 0개, 신규 역할·스키마·신청 테이블 없음. 기존 `ensure_rls`는 활성화돼 있으며 함수는 public 테이블만 처리한다. `pgrst.db_schemas` 값은 SQL 조회에서 null로, Data API 노출 설정을 판정하지 못했다.
+- 2026-11-09 읽기 전용 재조회: 대상 프로젝트는 `ai-education-hub-dev`이며 기존 이력 4건, 강좌 5개·주차 60개·기수 0개다. 신규 역할·스키마·후보 public 함수와 신청 테이블은 없고 `ensure_rls`는 활성화 상태다. 지정된 개발 Auth 사용자 ID 한 건이 존재하지만 관리자 권한을 등록한 것은 아니다.
+- 실제 `postgres`는 `auth` USAGE와 `auth.uid()` EXECUTE는 있지만 USAGE GRANT OPTION은 없다. 현재 `anon`·`authenticated`·`service_role`의 기수 테이블 INSERT·UPDATE·DELETE는 테이블 권한 조회상 없고, `service_role`은 `academy` USAGE도 없다. 이는 적용 전 상태이며 새 함수 적용 후의 열 단위·상속 권한과 실제 API 호출은 재검증해야 한다.
+- Data API 노출 설정은 `pgrst.db_schemas` SQL 조회로 판정하지 못했다. 사용자는 대시보드에서 `public`이 표시되고 `private_education`은 없다고 확인해 주었다. 이는 **사용자 확인**이며 도구로 독립 확인한 결과는 아니다. 적용 직전에 다시 확인한다.
+- Security Advisor 읽기 전용 재조회 결과 `auth_leaked_password_protection` 비활성 WARN 1건이 남아 있다. 설정을 변경하지 않았다. [조치 안내](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
 
 ## 초기 관리자 및 회수 절차 — 승인 전 계획
 
@@ -39,9 +42,11 @@
 
 - v1은 `supabase/drafts/b03_5_insecure_v1_do_not_apply.sql`의 과거 검토 기록이며 적용 대상이 아니다. v2 후보는 CLI 3.0.0의 `migration new`로 만든 `supabase/migrations/20261108183527_b03_5_admin_membership_and_offerings_v2.sql`이다. 초기 관리자 데이터는 포함하지 않는다.
 - 적용 전 프로젝트 ID, 정확한 4개 이력, 강좌·주차·기수와 해시, 역할·함수·스키마 부재, RLS·ACL·기본 권한·인증 역할 멤버십·트리거·Data API 노출을 재확인한다. 예외가 있으면 중단한다.
-- CLI 3.0.0의 `db push --help`에서 `--remote`, `--dry-run`, `--skip-vault`를 확인했다. 사용자가 안전하게 준비한 개발 프로젝트의 IPv4 **Session Pooler** 주소와 비밀번호 없는 연결 URL, 세션 한정 비밀번호 방식 또는 보호된 pgpass를 사용해 `--dry-run --skip-vault --remote=<비밀번호 없는 풀러 URL>`을 수행한다. 비밀번호를 인자·로그에 넣지 않는다. 호스트는 대시보드 Connect에서 확인하고 추측하지 않는다. 이전 직접 CLI 연결은 IPv6 오류가 있었다.
-- dry-run 대상이 v2 한 파일뿐이 아니면 중단한다. dry-run은 SQL 실행 성공이나 원자성을 보장하지 않는다. CLI 정확한 실행 경로·확장 프로토콜 배치·트랜잭션 및 실패 시 마이그레이션 기록의 원자성을 실행기 문서와 격리 테스트로 재확인한다. migration 파일과 검증본 해시가 같아야 한다.
-- 단일 파일 dry-run·원자성 및 실제 사용자 검증 준비가 충족된 뒤에만 정확한 SQL·영향·실행 경로를 사용자에게 제시하고 **별도 개발 DB 적용 승인**을 받는다. 초기 관리자 등록에는 별도 승인이 필요하다. 이 계획 자체는 승인이 아니다.
+- CLI 3.0.0의 `db push --help`에서 `--remote`, `--dry-run`, `--skip-vault`를 확인했다. IPv4 **Session Pooler** 주소는 대시보드 Connect에서 확인하고 비밀번호는 명령 인자·로그에 넣지 않는다. 이전 직접 CLI 연결은 IPv6 오류가 있었다.
+- **사용자 보고, 2026-11-09:** Session Pooler dry-run에서 신규 `20261108183527_b03_5_admin_membership_and_offerings_v2.sql` 한 건만 표시되고 `Finished supabase db push`가 출력됐으며 실제 SQL 적용은 하지 않았다고 밝혔다. 출력 원문·실행 플래그·연결 호스트와 TLS 인증서 검증 결과는 이 검토자가 독립 관찰하지 못했다. 해당 메시지만으로 dry-run 여부를 단독 판정하지 않는다.
+- 같은 날 읽기 전용 DB 이력에서 기존 4건만 존재하고 후보의 버전·역할·스키마가 없음을 확인했다. 현재 로컬 후보 SHA-256은 `4fe473787ce8e2a6d312b455554a0ffe1936761755b2e78660512758ec628928`이다. 사용자가 실행한 당시 파일 바이트와 호스팅 연결을 독립적으로 입증한 결과는 아니다. 적용 직전 파일·대상·미적용 목록을 다시 확인한다.
+- 원자성: 격리 PostgreSQL에서 명시적 트랜잭션의 정상 실행과 충돌 시 ROLLBACK을 검증했다. [CLI v3.0.0 실행 문서](https://github.com/supabase/cli/blob/v3.0.0/apps/cli/src/commands/db/push/SIDE_EFFECTS.md)는 호환 SQL과 이력 INSERT를 한 확장 프로토콜 배치에 넣지만 `CREATE INDEX CONCURRENTLY`, `REINDEX CONCURRENTLY`, `VACUUM`, `ALTER SYSTEM`, `CLUSTER`가 있으면 경계를 분리해 원자성을 잃는다고 설명한다. 후보에서 이런 문장과 트랜잭션 분리 지시·명시적 `LOCK TABLE`은 검색되지 않았다. 문서와 격리 테스트는 실제 호스팅 실행·연결 장애·이력 기록의 원자성을 실증하지 않는다. dry-run도 SQL을 실행하지 않으므로 이를 입증하지 않는다. 실행기 버전·호스트·트랜잭션 처리 근거를 적용 전에 재확인하고 보장할 수 없으면 중단한다.
+- 승인 1: 위 v2 스키마 마이그레이션 1건을 지정된 개발 DB에만 적용한다. 기존 4건 재실행·관리자 행 등록·데이터 삭제는 범위 밖이다. 승인 2: 적용과 이력·보안 검사 후, 지정된 개발 Auth UID 1건을 관리자 목록에 등록한다. 두 작업은 별도 요청과 승인으로 처리하며 이 계획이나 dry-run은 승인이 아니다.
 - 오류·타임아웃 시 추가 실행을 즉시 중단한다. 마이그레이션 이력·역할·함수·정책·데이터를 읽기 전용 조회해 부분 적용 여부를 판별한다. 재실행·이력 repair·일괄 DROP은 하지 않는다. 필요 시 신규 객체의 의존관계와 관리자 접근 중단 영향을 확인하고 표적 복구/정방향 수정안을 별도 승인받는다.
 - 적용 후에는 테이블/RLS/역할 멤버십·함수 소유자·search_path·모든 유효 GRANT·Data API 노출과 Security Advisor를 확인한다. 관리자 bootstrap 후 실제 관리자·별도 일반 사용자·익명 JWT, 회수 후 기존 JWT 및 직접 쓰기 차단을 검증하고 강좌 5개·60주·공개 조회를 비교한다.
 - 함수가 Data API에서 보이지 않으면 노출 스키마와 PostgREST 스키마 캐시를 먼저 확인한다. 원인 불명 상태에서 반복 적용하거나 캐시 설정을 임의 변경하지 않는다.
