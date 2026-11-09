@@ -1,6 +1,16 @@
 # B-03-5 관리자 권한 단일화 및 적용 검토
 
-검토일 2026-11-09. 대상은 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`뿐이다. **실제 DB 적용이나 관리자 등록·회수는 수행하지 않았다.** 현재 파일은 검토 가능한 정식 마이그레이션 후보이며 실제 적용 승인이나 호스팅 환경 검증 완료를 의미하지 않는다.
+검토일 2026-11-09. 대상은 `ai-education-hub-dev` / `uenvjqgylrevujdjpfed`뿐이다. **관리자 RPC v2 마이그레이션은 개발 DB에 적용됐으며, 초기 관리자 등록·회수는 수행하지 않았다.** 아래의 적용 전 계획과 점검 항목은 당시 기록이며, 최신 검증 결과는 바로 아래와 문서 마지막 절을 따른다.
+
+## 현재 적용 상태
+
+- 사용자가 조건부 승인한 후 Session Pooler 경로로 `20261108183527_b03_5_admin_membership_and_offerings_v2`를 적용했다. 실제 개발 DB의 이력에서 동일 버전·이름과 38개 기록 문장을 확인했다. Git 후보 파일의 버전과 일치한다.
+- `private_education.offering_admins`는 RLS가 켜져 있고 관리자 행은 0개다. 기존 강좌 5개·주차 60개·기수 0개와 개발 Auth 테스트 사용자 1명, `ensure_rls` 이벤트 트리거 활성 상태가 유지된다.
+- 새 전용 역할은 NOLOGIN·NOINHERIT·NOBYPASSRLS이며 anon·authenticated·service_role·authenticator는 해당 역할의 멤버가 아니다. 관리자 목록 직접 SELECT·쓰기와 기수 직접 쓰기는 이 API 역할들에 허용되지 않는다. 전용 역할만 필요한 기수 열 쓰기와 전용 RLS 정책을 받는다.
+- 내부 SECURITY DEFINER 3개 중 관리자 여부 함수는 BYPASSRLS의 `postgres` 소유이고 기수 함수 2개는 전용 역할 소유다. `search_path`는 비어 있고 공개 래퍼 3개는 SECURITY INVOKER다. 신규 함수 6개 모두 PUBLIC·anon에는 EXECUTE가 없고 authenticated에는 부여돼 있다. 내부 함수 본문 3개의 MD5는 해당 로컬 SQL 본문과 일치했다. 이는 SQL 파일 전체와 DB 이력이 바이트 단위로 같다는 뜻은 아니다.
+- 실제 익명 Data API에서 공개 강좌 5건·주차 60건을 조회했고 `academy_is_admin_v2`는 HTTP 401 / SQLSTATE `42501`로 거부됐다. 비공개 스키마에 대한 직접 Data API 조회는 HTTP 406 / `PGRST106`으로 거부됐다. 실제 일반 사용자 JWT와 관리자 등록 후 JWT의 접근·저장·회수 검사는 미실시다.
+- Security Advisor에 기존 유출 비밀번호 보호 비활성화 WARN 1건과 `private_education.offering_admins`의 RLS 정책 없음 INFO 1건이 있다. 후자는 클라이언트 접근을 허용하는 정책을 두지 않은 현재 설계의 결과이며, RLS 우회가 가능한 소유자의 함수는 별도 고권한 경계로 계속 관리해야 한다. [RLS INFO 안내](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [비밀번호 보호 안내](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+- 초기 관리자 한 명의 등록은 별도 승인 전이다. 신규 서버 코드는 관리자 목록이 비어 있으면 접근을 거부하므로 기존 관리자 서버를 먼저 전환하지 않는다. 전체 백업 복구·실제 Auth 세션 회수·전체 호스팅 기능은 여전히 미검증이다.
 
 ## 단일 기준과 회수
 
