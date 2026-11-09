@@ -8,9 +8,9 @@
 - `private_education.offering_admins`는 RLS가 켜져 있고 별도 승인된 관리자 행은 1개다. 기존 강좌 5개·주차 60개·기수 0개와 개발 Auth 테스트 사용자, `ensure_rls` 이벤트 트리거 활성 상태가 유지된다.
 - 새 전용 역할은 NOLOGIN·NOINHERIT·NOBYPASSRLS이며 anon·authenticated·service_role·authenticator는 해당 역할의 멤버가 아니다. 관리자 목록 직접 SELECT·쓰기와 기수 직접 쓰기는 이 API 역할들에 허용되지 않는다. 전용 역할만 필요한 기수 열 쓰기와 전용 RLS 정책을 받는다.
 - 내부 SECURITY DEFINER 3개 중 관리자 여부 함수는 BYPASSRLS의 `postgres` 소유이고 기수 함수 2개는 전용 역할 소유다. `search_path`는 비어 있고 공개 래퍼 3개는 SECURITY INVOKER다. 신규 함수 6개 모두 PUBLIC·anon에는 EXECUTE가 없고 authenticated에는 부여돼 있다. 내부 함수 본문 3개의 MD5는 해당 로컬 SQL 본문과 일치했다. 이는 SQL 파일 전체와 DB 이력이 바이트 단위로 같다는 뜻은 아니다.
-- 실제 익명 Data API에서 공개 강좌 5건·주차 60건을 조회했고 `academy_is_admin_v2`는 HTTP 401 / SQLSTATE `42501`로 거부됐다. 비공개 스키마에 대한 직접 Data API 조회는 HTTP 406 / `PGRST106`으로 거부됐다. 실제 관리자의 로그인 세션을 이용한 권한 확인과 기수 조회는 통과했고, 일반 사용자 JWT의 거부 및 관리자 저장·회수 검사는 미실시다.
+- 실제 익명 Data API에서 공개 강좌 5건·주차 60건을 조회했고 `academy_is_admin_v2`는 HTTP 401 / SQLSTATE `42501`로 거부됐다. 비공개 스키마에 대한 직접 Data API 조회는 HTTP 406 / `PGRST106`으로 거부됐다. 실제 관리자의 로그인 세션을 이용한 권한 확인과 기수 조회는 통과했고, 별도 일반 사용자 로그인 세션의 관리자 접근은 거부됐다. 관리자 기수 저장·권한 회수 검사는 미실시다.
 - Security Advisor에 기존 유출 비밀번호 보호 비활성화 WARN 1건과 `private_education.offering_admins`의 RLS 정책 없음 INFO 1건이 있다. 후자는 클라이언트 접근을 허용하는 정책을 두지 않은 현재 설계의 결과이며, RLS 우회가 가능한 소유자의 함수는 별도 고권한 경계로 계속 관리해야 한다. [RLS INFO 안내](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [비밀번호 보호 안내](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
-- 초기 관리자 한 명은 별도 승인 후 등록됐다. 신규 서버 코드의 실제 일반 사용자 접근 거부 검증이 완료되기 전에는 기존 관리자 서버를 전환하지 않는다. 전체 백업 복구·실제 Auth 세션 회수·전체 호스팅 기능은 여전히 미검증이다.
+- 초기 관리자 한 명은 별도 승인 후 등록됐다. 신규 코드의 관리자·일반 사용자 접근 검사는 로컬 개발 서버에서 수행했으며 기존 관리자 서버나 운영 배포는 전환하지 않았다. 전체 백업 복구·실제 Auth 세션 회수·전체 호스팅 기능은 여전히 미검증이다.
 
 ## 단일 기준과 회수
 
@@ -101,4 +101,4 @@
 - 기존 강좌 5개·주차 60개·기수 0건을 재확인했다. 관리자 목록 RLS와 익명·일반 인증 역할의 직접 목록 읽기·쓰기 권한 차단은 유지됐다.
 - 실제 익명 Supabase API의 관리자 여부·기수 조회 RPC는 각각 HTTP 401 / `42501`로 거부됐다. 로컬 테스트 서버에서 미인증 `/api/admin/access`는 401, 관리자 화면은 로그인 페이지로 리디렉션됐다.
 - 사용자가 개발 관리자 계정으로 로컬 테스트 서버에 직접 로그인했다. 서버의 `getUser()`와 사용자 JWT 기반 `academy_is_admin_v2()`를 통과해야 표시되는 관리자 화면과 접근 API `authorized: true`를 확인했다. JWT 자체는 열람하거나 저장하지 않았다. 관리자 기수 조회 RPC를 사용하는 화면에서 강좌 5개와 기수 0개가 표시됐으며, 기수를 등록·수정하지 않았다.
-- 별도 일반 사용자 JWT를 통한 거부와 관리자 저장·권한 회수 테스트는 미검증이다. 기존 운영 화면이나 Vercel Production은 전환하지 않았다.
+- 사용자가 별도 일반 Auth 계정을 개발 프로젝트에서 직접 만든 뒤, 관리자와 분리된 로컬 호스트의 로그인 화면에 직접 로그인했다. 로그인된 일반 사용자의 관리자 화면은 접근 거부 경로로 리디렉션됐고 `/api/admin/access`는 HTTP 403과 `authorized: false`를 반환했다. 이 서버 경로는 실제 세션의 `getUser()`와 `academy_is_admin_v2()`를 사용한다. 일반 사용자의 기수 저장 RPC 직접 호출, 관리자 저장 및 권한 회수는 미검증이다. 기존 운영 화면이나 Vercel Production은 전환하지 않았다.
