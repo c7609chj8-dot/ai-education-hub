@@ -16,6 +16,7 @@
     "test:admin-management": "node scripts/verify-admin-management.mjs",
     "test:admin-offerings-v1": "node scripts/verify-admin-offerings-v1.mjs",
     "test:admin-offerings-v2": "node scripts/verify-admin-offerings-v2-pglite.mjs",
+    "test:b03-6-offering": "node scripts/verify-b03-6-offering.mjs",
     "test:admin-offerings-v2-postgres": "node scripts/verify-admin-offerings-v2-postgres.mjs",
     "test:admin-offering-services": "node scripts/verify-admin-offering-services.mjs",
     "test:admin-offering-form": "node scripts/verify-admin-offering-form.mjs",
