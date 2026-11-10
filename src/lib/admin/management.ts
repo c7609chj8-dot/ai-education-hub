@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAuthConfig } from "@/lib/supabase/config";
 import { createAuthClient } from "@/lib/supabase/server";
 import { getAdminAccess } from "./access";
+import { classifyFailure, reportAdminFailure } from "./diagnostics";
 import type { AdminCatalog, CourseInput, CourseState, ManagedCourse, ManagedOffering, OfferingCatalog, OfferingCourse, OfferingInput, OfferingState } from "./management-types";
 
 // Secret client creation is gated here too, so every data access rechecks the user.
@@ -80,18 +81,28 @@ export async function loadAdminOfferingCatalog(): Promise<OfferingCatalog | null
   try {
     const supabase = await authorizedOfferingClient();
     if (!supabase) return null;
-    const { data, error } = await supabase.rpc("academy_admin_offerings_catalog_v2");
-    if (error || !data || typeof data !== "object" || !Array.isArray(data.courses) || !Array.isArray(data.offerings)) return null;
+    const { data, error, status } = await supabase.rpc("academy_admin_offerings_catalog_v2");
+    if (error) { reportAdminFailure("offering_catalog", classifyFailure(error, status)); return null; }
+    if (!data || typeof data !== "object" || !Array.isArray(data.courses) || !Array.isArray(data.offerings)) {
+      reportAdminFailure("offering_catalog", "invalid_response"); return null;
+    }
     const courses: OfferingCourse[] = [];
     for (const row of data.courses) {
       if (!row || typeof row.id !== "string" || typeof row.title !== "string" ||
-          !["draft", "published", "archived"].includes(row.publication_state)) return null;
+          !["draft", "published", "archived"].includes(row.publication_state)) {
+        reportAdminFailure("offering_catalog", "invalid_response"); return null;
+      }
       courses.push({ id: row.id, title: row.title, publicationState: row.publication_state as CourseState });
     }
     const offerings = data.offerings.map((item: unknown) => offering(item, true));
-    if (offerings.some((item: ManagedOffering | null) => !item)) return null;
+    if (offerings.some((item: ManagedOffering | null) => !item)) {
+      reportAdminFailure("offering_catalog", "invalid_response"); return null;
+    }
     return { courses, offerings: offerings as ManagedOffering[] };
-  } catch { return null; }
+  } catch (error) {
+    reportAdminFailure("offering_catalog", classifyFailure(error));
+    return null;
+  }
 }
 
 export async function saveCourse(input: CourseInput): Promise<boolean> {

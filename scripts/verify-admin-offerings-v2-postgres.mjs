@@ -10,6 +10,7 @@ import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { verifyOfferingV2 } from "./verify-admin-offerings-v2-cases.mjs";
+import { verifyCleanupPostgres } from "./verify-b03-8-cleanup-postgres-cases.mjs";
 
 if(process.platform!=="win32"||process.arch!=="x64")throw Error("Fixture requires Windows x64");
 const modules=process.env.DAY12_PG_MODULE_ROOT;
@@ -107,6 +108,7 @@ try {
   assert.equal((await client.query("DELETE FROM academy.offerings WHERE id=$1 RETURNING id",[draftOne])).rows.length,1);
   assert.equal((await client.query("SELECT count(*)::int n FROM academy.offerings WHERE id IN ($1::uuid,$2::uuid)",[draftOne,draftTwo])).rows[0].n,0);
   console.log("PASS: concurrent private drafts produce one row, remain unpublished and are removed from the isolated DB");
+  await verifyCleanupPostgres({client,first,second,observer,course});
   console.log("PASS: PostgreSQL 17.11 non-superuser, non-grantable auth schema and enabled ensure_rls trigger");
 }catch(e){failure=e;}
 finally {
