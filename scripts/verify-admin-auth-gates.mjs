@@ -15,7 +15,7 @@ const env={ACADEMY_ADMIN_USER_IDS:admin}; // Legacy value must not grant authori
 const access=compile("src/lib/admin/access.ts",{"@/lib/supabase/server":{createAuthClient:async()=>client?{
   auth:{getUser:async()=>{checks++;if(throwGet)throw Error("auth unavailable");return response;}},
   rpc:async(name)=>{assert.equal(name,"academy_is_admin_v2");rpcChecks++;if(throwRpc)throw Error("db unavailable");return {data:member,error:rpcError};}
-}:null}},{process:{env}});
+}:null},"./diagnostics":{classifyFailure:()=>"unknown",reportAdminFailure:()=>{}}},{process:{env}});
 const route=compile("src/app/api/admin/access/route.ts",{"next/server":{NextResponse:{json:(body,options)=>({body,...options})}},"@/lib/admin/access":access});
 let result=await route.GET();assert.equal(result.status,401);assert.equal(result.body.authorized,false);
 response={data:{user:{id:other,user_metadata:{is_admin:true}}},error:null};

@@ -11,7 +11,7 @@ const compile=(file,imports,globals={})=>{
 };
 const actor="11111111-1111-4111-8111-111111111111", app="22222222-2222-4222-8222-222222222222", offer="33333333-3333-4333-8333-333333333333";
 let user={id:actor}, membership=true;
-const access=compile("src/lib/admin/access.ts",{"@/lib/supabase/server":{createAuthClient:async()=>({auth:{getUser:async()=>({data:{user},error:null})},rpc:async()=>({data:membership,error:null})})}});
+const access=compile("src/lib/admin/access.ts",{"@/lib/supabase/server":{createAuthClient:async()=>({auth:{getUser:async()=>({data:{user},error:null})},rpc:async()=>({data:membership,error:null})})},"./diagnostics":{classifyFailure:()=>"unknown",reportAdminFailure:()=>{}}});
 assert.equal((await access.getAdminIdentity()).access,"allowed");
 user={id:"44444444-4444-4444-8444-444444444444",user_metadata:{is_admin:true}};membership=false;assert.equal((await access.getAdminIdentity()).access,"forbidden");
 user=null;assert.equal((await access.getAdminIdentity()).access,"unauthenticated");user={id:actor};assert.equal((await access.getAdminIdentity()).access,"forbidden");

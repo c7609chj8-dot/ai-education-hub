@@ -11,6 +11,7 @@ const imports={
   "@/lib/supabase/server":{createAuthClient:async()=>{created++;return {rpc:async(name,args)=>{calls.push({name,args});return response;}}}},
   "@/lib/supabase/config":{getSupabaseAuthConfig:()=>({url:"https://uenvjqgylrevujdjpfed.supabase.co"})},
   "./access":{getAdminAccess:async()=>access},
+  "./diagnostics":{classifyFailure:()=>"unknown",reportAdminFailure:()=>{}},
 };
 const m={exports:{}};
 vm.runInNewContext(code,{module:m,exports:m.exports,require:(name)=>name==="server-only"?{}:imports[name]??(()=>{throw Error("Unexpected import")})(),URL,Date,process:{env},fetch:()=>{throw Error("no network")}});
