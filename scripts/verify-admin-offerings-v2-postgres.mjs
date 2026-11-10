@@ -93,6 +93,20 @@ try {
   assert.equal(locked,true,"concurrent duplicate must wait for the first transaction");
   await first.query("COMMIT");const outcome=await raced;if(outcome.error)throw outcome.error;assert.equal(outcome.result.rows[0].result,"duplicate");await second.query("COMMIT");
   console.log("PASS: concurrent duplicates serialize and produce one offering");
+  const draftSave="SELECT public.academy_admin_save_offering_v2($1::uuid,true,$2::uuid,'2027-03-02','2027-05-18','2027-02-01T00:00:00Z','2027-02-28T09:00:00Z','가상 검증',10,'draft',false) AS result";
+  const draftOne="33333333-3333-4333-8333-333333333333", draftTwo="44444444-4444-4444-8444-444444444444";
+  const publicBefore=(await client.query("SELECT count(*)::int n FROM public.published_offerings")).rows[0].n;
+  await first.query("BEGIN");await second.query("BEGIN");
+  assert.equal((await first.query(draftSave,[draftOne,course])).rows[0].result,"saved");
+  const draftRace=second.query(draftSave,[draftTwo,course]).then(result=>({result}),error=>({error}));
+  let draftLocked=false;for(let i=0;i<100;i++){const q=await observer.query("SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1",[second.processID]);if(q.rows[0]?.wait_event_type==="Lock"){draftLocked=true;break}await new Promise(r=>setTimeout(r,25))}
+  assert.equal(draftLocked,true,"private draft duplicate must wait for the first transaction");
+  await first.query("COMMIT");const draftOutcome=await draftRace;if(draftOutcome.error)throw draftOutcome.error;assert.equal(draftOutcome.result.rows[0].result,"duplicate");await second.query("COMMIT");
+  assert.equal((await client.query("SELECT count(*)::int n FROM academy.offerings WHERE id IN ($1::uuid,$2::uuid)",[draftOne,draftTwo])).rows[0].n,1);
+  assert.equal((await client.query("SELECT count(*)::int n FROM public.published_offerings")).rows[0].n,publicBefore);
+  assert.equal((await client.query("DELETE FROM academy.offerings WHERE id=$1 RETURNING id",[draftOne])).rows.length,1);
+  assert.equal((await client.query("SELECT count(*)::int n FROM academy.offerings WHERE id IN ($1::uuid,$2::uuid)",[draftOne,draftTwo])).rows[0].n,0);
+  console.log("PASS: concurrent private drafts produce one row, remain unpublished and are removed from the isolated DB");
   console.log("PASS: PostgreSQL 17.11 non-superuser, non-grantable auth schema and enabled ensure_rls trigger");
 }catch(e){failure=e;}
 finally {
