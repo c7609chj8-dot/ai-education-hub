@@ -11,6 +11,7 @@ import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { verifyOfferingV2 } from "./verify-admin-offerings-v2-cases.mjs";
 import { verifyCleanupPostgres } from "./verify-b03-8-cleanup-postgres-cases.mjs";
+import { verifyB039Candidates } from "./verify-b03-9-psql-candidates.mjs";
 
 if(process.platform!=="win32"||process.arch!=="x64")throw Error("Fixture requires Windows x64");
 const modules=process.env.DAY12_PG_MODULE_ROOT;
@@ -47,6 +48,10 @@ try {
     GRANT CREATE ON DATABASE postgres TO postgres;
     GRANT CREATE ON SCHEMA public TO postgres;
     CREATE SCHEMA auth AUTHORIZATION supabase_admin;
+    CREATE TABLE auth.users(id uuid PRIMARY KEY);
+    INSERT INTO auth.users(id) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+    ALTER TABLE auth.users OWNER TO supabase_admin;
+    GRANT SELECT ON auth.users TO postgres;
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS
       $$ SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
     ALTER FUNCTION auth.uid() OWNER TO supabase_admin;
@@ -109,6 +114,7 @@ try {
   assert.equal((await client.query("SELECT count(*)::int n FROM academy.offerings WHERE id IN ($1::uuid,$2::uuid)",[draftOne,draftTwo])).rows[0].n,0);
   console.log("PASS: concurrent private drafts produce one row, remain unpublished and are removed from the isolated DB");
   await verifyCleanupPostgres({client,first,second,observer,course});
+  await verifyB039Candidates({client,first,course,port,password,root});
   console.log("PASS: PostgreSQL 17.11 non-superuser, non-grantable auth schema and enabled ensure_rls trigger");
 }catch(e){failure=e;}
 finally {
