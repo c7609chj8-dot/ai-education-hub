@@ -18,7 +18,9 @@ export async function getAdminIdentity(): Promise<AdminIdentity> {
   try {
     const result = await client.auth.getUser();
     if (result.error) {
-      reportAdminFailure("auth_user", classifyFailure(result.error, result.error.status));
+      // No session is an expected visitor state; avoid a warning per anonymous request.
+      if (result.error.name !== "AuthSessionMissingError")
+        reportAdminFailure("auth_user", classifyFailure(result.error, result.error.status));
       return { access: "unauthenticated" };
     }
     if (!result.data.user) return { access: "unauthenticated" };

@@ -82,6 +82,7 @@ const access=await load("src/lib/admin/access.ts",{
   "@/lib/supabase/server":{createAuthClient:async()=>({
     auth:{getUser:async()=>{
       if(identityFailure==="getUser") throw broken;
+      if(identityFailure==="no_session") return {data:{user:null},error:{name:"AuthSessionMissingError",status:400}};
       if(identityFailure==="expired") return {data:{user:null},error:{name:"AuthApiError",status:401,message:"secret-marker"}};
       if(identityFailure==="server") return {data:{user:null},error:{name:"AuthApiError",status:503,message:"secret-marker"}};
       return {data:{user:{id:"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"}}};
@@ -91,6 +92,8 @@ const access=await load("src/lib/admin/access.ts",{
   "./diagnostics":diagnostics,
 });
 assert.equal(await access.getAdminAccess(),"unauthenticated");
+identityFailure="no_session";
+const beforeMissing=logs.length;assert.equal(await access.getAdminAccess(),"unauthenticated");assert.equal(logs.length,beforeMissing);
 identityFailure="expired";assert.equal(await access.getAdminAccess(),"unauthenticated");
 identityFailure="server";assert.equal(await access.getAdminAccess(),"unauthenticated");
 identityFailure="rpc";
