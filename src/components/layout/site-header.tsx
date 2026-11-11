@@ -11,15 +11,25 @@ export function SiteHeader({ brand }: { brand: Brand }) {
         <Link
           href="/"
           aria-label={`${brand.name} 홈`}
-          className="flex min-h-11 min-w-0 items-center gap-2 rounded-control text-brand-navy sm:gap-3"
+          className="flex min-h-11 min-w-0 items-center gap-2 rounded-control text-brand-navy"
         >
-          <span className="relative block size-20 shrink-0 rounded-control sm:size-24">
+          <span className="relative block size-10 shrink-0 sm:size-14">
+            <Image
+              src={siteConfig.teamLogoSrc}
+              alt=""
+              fill
+              sizes="(min-width: 640px) 56px, 40px"
+              className="object-contain"
+              unoptimized
+            />
+          </span>
+          <span className="relative block size-10 shrink-0 sm:size-14">
             <Image
               src={siteConfig.logoSrc}
               alt=""
               fill
-              sizes="(min-width: 640px) 96px, 80px"
-              className="rounded-control object-contain"
+              sizes="(min-width: 640px) 56px, 40px"
+              className="object-contain"
               unoptimized
             />
           </span>
