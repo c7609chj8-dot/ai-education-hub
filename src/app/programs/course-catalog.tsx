@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { CourseCard } from "@/components/course-card";
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { CoursePreview } from "@/data/mock/courses";
@@ -77,15 +77,7 @@ export function CourseCatalog({ courses }: { courses: CoursePreview[] }) {
         {filtered.length > 0 ? (
           <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((course) => (
-              <article key={course.id} className="flex flex-col rounded-card border border-line bg-surface p-6">
-                <p className="text-sm font-semibold text-teal-ink">{course.category}</p>
-                <h3 className="mt-3 text-xl font-bold leading-snug text-brand-navy">{course.title}</h3>
-                <p className="mt-3 flex-1 leading-relaxed text-muted">{course.summary}</p>
-                <p className="mt-5 text-sm text-muted">대상 · {course.audience}</p>
-                <Link href={`/programs/${course.slug}`} aria-label={`${course.title} 안내 보기`} className="mt-4 inline-flex min-h-11 w-fit items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
-                  과정 안내 보기 <span aria-hidden="true" className="ms-2">→</span>
-                </Link>
-              </article>
+              <CourseCard key={course.id} course={course} />
             ))}
           </div>
         ) : (

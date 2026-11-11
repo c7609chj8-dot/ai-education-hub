@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 import { EducationIntro } from "./education-intro";
 import { HeroGallery } from "./hero-gallery";
 import { HomePreviews } from "@/components/home-previews";
+
+export const revalidate = 3600;
 
 const learningValues = [
   { title: "쉽게 시작하는 배움", description: "처음 만나는 분도 일상에서 쓰는 말과 예시로 차근차근 배웁니다." },
@@ -13,27 +14,26 @@ const learningValues = [
 export default function Home() {
   return (
     <>
-      <section className="bg-surface">
+      <section className="border-b border-line bg-canvas">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:gap-14 lg:py-20">
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">모두를 위한 AI 교육</p>
             <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">
-              {siteConfig.slogan}
+              AI를 배워,<br className="hidden sm:block" /> 생활과 일에 써보세요
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">{siteConfig.description}</p>
-            <p className="mt-3 max-w-lg leading-relaxed text-muted">
-              생활 속 작은 궁금증부터 일의 새로운 방법까지, 함께 배우고 직접 만들어 봅니다.
+            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted sm:text-lg">
+              챗GPT 입문부터 업무 개선, 전자책 제작, 소상공인 마케팅까지 직접 실습합니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/programs" className="ui-button ui-button--primary">교육과정 살펴보기 <span aria-hidden="true">→</span></Link>
-              <Link href="/about" className="ui-button ui-button--secondary">기관소개</Link>
+              <Link href="/programs" className="ui-button ui-button--primary">교육과정 보기 <span aria-hidden="true">→</span></Link>
+              <Link href="/schedule" className="ui-button ui-button--secondary bg-white">교육일정 보기</Link>
             </div>
           </div>
           <HeroGallery />
         </div>
       </section>
 
-      <section aria-labelledby="learning-heading" className="bg-canvas">
+      <section aria-labelledby="learning-heading" className="bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-20">
           <div className="max-w-2xl">
             <p className="text-sm font-bold tracking-wide text-teal-ink">교육 방향</p>
@@ -42,7 +42,7 @@ export default function Home() {
           </div>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {learningValues.map((value) => (
-              <article key={value.title} className="rounded-card border border-line bg-surface p-6">
+              <article key={value.title} className="rounded-card border border-line bg-canvas p-6">
                 <span aria-hidden="true" className="block h-1 w-10 rounded-full bg-brand-teal" />
                 <h3 className="mt-5 text-lg font-bold text-brand-navy">{value.title}</h3>
                 <p className="mt-3 leading-relaxed text-muted">{value.description}</p>

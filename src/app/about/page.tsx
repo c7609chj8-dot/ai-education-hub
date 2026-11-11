@@ -43,6 +43,13 @@ export default function AboutPage() {
             <div><h3 className="font-bold text-brand-navy">강사 소개</h3><p className="mt-2 text-muted">강사진은 확정 후 안내하겠습니다.</p></div>
             <div><h3 className="font-bold text-brand-navy">기관 연혁</h3><p className="mt-2 text-muted">기관 정보는 확정 후 안내하겠습니다.</p></div>
           </div>
+          <div className="mt-8 rounded-card border border-line bg-surface p-6">
+            <h3 className="font-bold text-brand-navy">산학 교육협력</h3>
+            <p className="mt-2 text-muted">대학과 기관을 위한 AI 실습 교육과 공동 프로그램을 협의합니다.</p>
+            <Link href="/partnership" className="mt-2 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
+              교육협력 안내 <span aria-hidden="true" className="ms-2">→</span>
+            </Link>
+          </div>
           <Link href="/programs" className="ui-button ui-button--primary mt-9">교육과정 살펴보기 <span aria-hidden="true">→</span></Link>
         </div>
       </section>

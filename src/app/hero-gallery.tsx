@@ -3,33 +3,8 @@
 import Image from "next/image";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 
-const photos = [
-  {
-    slug: "life-chatgpt",
-    title: "생활 속 챗GPT 활용",
-    alt: "시니어 학습자가 강사와 함께 노트북을 사용하는 모습",
-  },
-  {
-    slug: "ai-work",
-    title: "생성형 AI 업무혁신 실무",
-    alt: "직장인들이 노트북과 막대그래프를 보며 업무 자료를 검토하는 모습",
-  },
-  {
-    slug: "ai-ebook",
-    title: "AI 전자책 제작·작가 도전",
-    alt: "예비 작가가 인쇄한 전자책 원고를 연필로 검토하는 모습",
-  },
-  {
-    slug: "ai-instructor",
-    title: "AI 전문강사·교육콘텐츠 제작",
-    alt: "강사가 화면에 띄운 교육 자료를 보며 수업을 시연하는 모습",
-  },
-  {
-    slug: "ai-business",
-    title: "AI 소상공인 창업·마케팅",
-    alt: "소상공인이 스마트폰으로 포장된 상품을 촬영하는 모습",
-  },
-];
+import Link from "next/link";
+import { coursePhotos as photos } from "@/data/course-photos";
 
 const arrowClass = "grid size-11 cursor-pointer place-items-center rounded-full border border-line bg-surface text-xl text-brand-navy hover:bg-canvas";
 
@@ -121,8 +96,16 @@ export function HeroGallery() {
         </button>
       </div>
       <figcaption className="text-center text-xs text-muted">
-        <span aria-live="polite" aria-atomic="true">{active + 1} / {photos.length} · {photos[active].title}</span>
-        <span className="mt-1 block">AI로 생성한 교육 장면 예시</span>
+        <div aria-live="polite" aria-atomic="true">
+          <span>{active + 1} / {photos.length}</span>
+          <Link
+            href={`/programs/${photos[active].slug}`}
+            className="ms-2 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-navy underline underline-offset-4"
+          >
+            {photos[active].title} <span aria-hidden="true" className="ms-1">→</span>
+          </Link>
+        </div>
+        <span className="block">AI로 생성한 교육 장면 예시</span>
       </figcaption>
     </figure>
   );
