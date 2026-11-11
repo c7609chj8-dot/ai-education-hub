@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { EducationIntro } from "./education-intro";
+import { HeroGallery } from "./hero-gallery";
 import { HomePreviews } from "@/components/home-previews";
 
 const learningValues = [
@@ -29,20 +29,7 @@ export default function Home() {
               <Link href="/about" className="ui-button ui-button--secondary">기관소개</Link>
             </div>
           </div>
-          {siteConfig.heroImageSrc && (
-            <figure>
-              <Image
-                src={siteConfig.heroImageSrc}
-                alt="여러 세대의 성인 학습자들이 강사와 노트북을 살펴보는 AI 생성 예시 이미지"
-                width={1536}
-                height={1024}
-                priority
-                sizes="(min-width: 1024px) 48vw, 100vw"
-                className="aspect-[3/2] w-full rounded-card object-cover"
-              />
-              <figcaption className="mt-2 text-xs text-muted">AI로 생성한 교육 장면 예시</figcaption>
-            </figure>
-          )}
+          <HeroGallery />
         </div>
       </section>
 

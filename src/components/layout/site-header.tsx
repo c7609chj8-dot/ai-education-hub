@@ -11,10 +11,16 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label={`${siteConfig.name} 홈`}
-          className="flex min-h-11 min-w-0 items-center gap-1.5 rounded-control font-semibold text-brand-navy sm:gap-3"
+          className="flex min-h-11 min-w-0 items-center gap-2 rounded-control sm:gap-3"
         >
-          <Image src={siteConfig.logoSrc} alt="" width={36} height={36} className="size-8 shrink-0 sm:size-9" unoptimized />
-          <span>{siteConfig.name}</span>
+          <Image
+            src={siteConfig.logoSrc}
+            alt=""
+            width={437}
+            height={96}
+            className="h-auto w-40 shrink-0 sm:w-48 lg:w-52"
+            unoptimized
+          />
           {siteConfig.nameQualifier && <Badge className="shrink-0 whitespace-nowrap">{siteConfig.nameQualifier}</Badge>}
         </Link>
         <SiteNavigation />

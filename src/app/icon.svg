@@ -1,5 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <title>AI</title>
-  <rect width="32" height="32" rx="6" fill="#0e3558"/>
-  <text x="16" y="23" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="white">AI</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img">
+  <title>에이담 AI아카데미 원형 책 엠블럼</title>
+  <rect width="96" height="96" rx="19" fill="#12294A"/>
+  <g transform="translate(10 10) scale(.792)">
+  <path d="M48 4 A44 44 0 1 1 47.99 4 Z M48 10 A38 38 0 1 1 47.99 10 Z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M48 39 Q37 29 25 33 L25 60 Q38 57 48 66 Q58 57 71 60 L71 33 Q59 29 48 39 L48 66" fill="none" stroke="#FFFFFF" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M34 46 L41 46 L48 52 L55 46 L62 46" fill="none" stroke="#FFFFFF" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30.5 46 A3.5 3.5 0 1 0 37.5 46 A3.5 3.5 0 1 0 30.5 46 Z M58.5 46 A3.5 3.5 0 1 0 65.5 46 A3.5 3.5 0 1 0 58.5 46 Z" fill="#FFFFFF"/>
+  </g>
 </svg>
