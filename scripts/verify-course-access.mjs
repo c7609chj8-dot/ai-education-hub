@@ -13,7 +13,7 @@ const source = read("src/data/mock/courses.ts");
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
 const moduleData = { exports: {} };
 vm.runInNewContext(compiled, { exports: moduleData.exports, module: moduleData });
-const examples = JSON.parse(JSON.stringify(moduleData.exports.courses));
+const examples = JSON.parse(JSON.stringify(Object.values(moduleData.exports.legacyCourseCatalog)));
 
 async function main() {
   const db = new PGlite();
@@ -55,3 +55,4 @@ async function main() {
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 1; });
+

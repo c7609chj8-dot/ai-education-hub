@@ -44,7 +44,7 @@ export function CourseCatalog({ courses }: { courses: CoursePreview[] }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             aria-describedby={`${searchId}-help`}
-            placeholder="예: 전자책, 시니어, 업무"
+            placeholder="예: 음악, 드론, 프로그래밍"
             className="mt-3 min-h-11 w-full rounded-control border border-line bg-surface px-4 py-2 text-ink placeholder:text-muted sm:max-w-xl"
           />
           <fieldset className="mt-6">
@@ -90,3 +90,4 @@ export function CourseCatalog({ courses }: { courses: CoursePreview[] }) {
     </section>
   );
 }
+

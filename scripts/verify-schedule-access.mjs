@@ -29,7 +29,7 @@ async function main() {
     const js = ts.transpileModule(read("src/data/mock/courses.ts"), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
     const moduleData = { exports: {} };
     vm.runInNewContext(js, { exports: moduleData.exports, module: moduleData });
-    const examples = JSON.parse(JSON.stringify(moduleData.exports.sampleOfferings));
+    const examples = JSON.parse(JSON.stringify(moduleData.exports.legacySampleOfferings));
     const seeded = await db.query("SELECT c.slug, o.start_date, o.end_date, o.location, o.capacity, o.status, o.is_public FROM academy.offerings o JOIN academy.courses c ON c.id=o.course_id");
     assert.equal(seeded.rows.length, 5);
     const statuses = { "모집중": "open", "마감임박": "open", "마감": "closed", "예정": "scheduled" };
@@ -70,3 +70,4 @@ async function main() {
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 1; });
+

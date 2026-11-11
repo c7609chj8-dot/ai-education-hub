@@ -27,7 +27,7 @@ export const sampleFaqs = [
     id: "sample-courses",
     category: "교육과정",
     question: "어떤 교육과정이 있나요?",
-    answer: "생활 속 AI 활용, 업무혁신, 전자책 제작, 교육콘텐츠 제작, 소상공인 마케팅 과정을 준비하고 있습니다.",
+    answer: "AI 경영관리학과, AI 음악제작학과, AI 항공영상제작학과, AI 멀티미디어학과, AI 프로그래밍학과, AI 광고영상제작과의 교육과정 초안을 검토하고 있습니다. 상세 내용과 모집 일정은 확정 후 안내합니다.",
     href: "/programs",
     linkLabel: "교육과정 보기",
   },
@@ -35,7 +35,7 @@ export const sampleFaqs = [
     id: "sample-duration",
     category: "교육과정",
     question: "교육은 얼마나 진행되나요?",
-    answer: "초기 과정은 12주 동안 주 2시간, 총 24시간으로 계획하고 있습니다. 세부 운영 방식은 확정 후 안내합니다.",
+    answer: "학과별 12주 구성은 검토용 초안입니다. 주당 시간과 총 교육시간, 개강 일정은 아직 미확정이며 검토 후 안내합니다.",
   },
   {
     id: "sample-schedule",

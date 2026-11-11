@@ -122,7 +122,7 @@ function ScheduleCalendar({ offerings, courseTitle, example }: { offerings: Sche
             <Link href="/schedule" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 교육일정 보기</Link>
           </div>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-card border border-line bg-surface p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <Button variant="secondary" aria-label="이전 달" onClick={() => changeMonth(-1)}>←</Button>
             <h2 className="min-w-32 text-center text-xl font-bold text-brand-navy sm:text-2xl" aria-live="polite">{formatMonth(month)}</h2>
@@ -175,7 +175,7 @@ function ScheduleCalendar({ offerings, courseTitle, example }: { offerings: Sche
               </table>
             </div>
             <div>
-              <h3 className="mb-4 text-xl font-bold text-brand-navy">
+              <h3 aria-live="polite" aria-atomic="true" className="mb-4 text-xl font-bold text-brand-navy">
                 {selectedDay ? `${formatDate(selectedDay)} ${example ? "예시 " : ""}일정` : `선택한 날짜의 ${example ? "예시 " : ""}일정`}
               </h3>
               {selectedOfferings.length ? (

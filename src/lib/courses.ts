@@ -3,11 +3,11 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
 import { connection } from "next/server";
-import { courses as exampleCourses, type CoursePreview } from "@/data/mock/courses";
+import { courses as exampleCourses, legacyCourseCatalog, type CoursePreview, type Course } from "@/data/mock/courses";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
 export type CourseWeek = { weekNumber: number; title: string };
-export type CourseDetail = CoursePreview & { objectives: string[]; weeks: CourseWeek[]; durationHours: number | null };
+export type CourseDetail = CoursePreview & { objectives: string[]; weeks: CourseWeek[]; durationHours: number | null; curriculumDraft?: Course["curriculumDraft"] };
 export type CourseSource = "mock" | "supabase";
 
 export class CourseDataUnavailable extends Error {
@@ -57,7 +57,7 @@ export const findCourse = cache(async (slug: string): Promise<{ course: CourseDe
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return null;
   const source = getCourseSource();
   if (source === "mock") {
-    const course = exampleCourses.find((item) => item.slug === slug);
+    const course = [...exampleCourses, ...Object.values(legacyCourseCatalog)].find((item) => item.slug === slug);
     return course ? { course: { ...course, weeks: course.weeks.map((title, index) => ({ weekNumber: index + 1, title })) }, source, example: true } : null;
   }
   const supabase = createPublishedDataClient();

@@ -4,23 +4,38 @@ import { siteConfig } from "@/config/site";
 import type { Brand } from "@/lib/brand/types";
 import { SiteNavigation } from "./site-navigation";
 
-export function SiteHeader({brand}:{brand:Brand}) {
+export function SiteHeader({ brand }: { brand: Brand }) {
   return (
     <header className="relative z-10 border-b border-line bg-surface">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-8 lg:min-h-20">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4 py-2 sm:px-8 lg:min-h-20">
         <Link
           href="/"
           aria-label={`${brand.name} 홈`}
-          className="flex min-h-11 min-w-0 items-center gap-1.5 rounded-control font-semibold text-brand-navy sm:gap-3"
+          className="flex min-h-11 min-w-0 items-center gap-3 rounded-control text-brand-navy"
         >
-          {brand.name === siteConfig.name ? (
-            <Image src={siteConfig.logoSrc} alt="" width={437} height={96} className="h-auto w-40 shrink-0 sm:w-48 lg:w-52" unoptimized />
-          ) : (
-            <>
-              <Image src="/icon.svg" alt="" width={36} height={36} className="size-8 shrink-0 sm:size-9" unoptimized />
-              <span className="min-w-0 break-words">{brand.name}</span>
-            </>
-          )}
+          <span className="flex shrink-0 items-center gap-2">
+            <span className="relative block h-10 w-[48px] shrink-0 sm:h-14 sm:w-[67px]">
+              <Image
+                src={siteConfig.teamLogoSrc}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 67px, 48px"
+                className="object-contain"
+                unoptimized
+              />
+            </span>
+            <span className="relative block size-10 shrink-0 sm:size-14">
+              <Image
+                src={siteConfig.logoSrc}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 56px, 40px"
+                className="object-contain"
+                unoptimized
+              />
+            </span>
+          </span>
+          <span className="min-w-0 text-xl font-bold leading-tight sm:text-2xl">{brand.name}</span>
         </Link>
         <SiteNavigation />
       </div>
