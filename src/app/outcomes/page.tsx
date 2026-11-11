@@ -9,7 +9,7 @@ export const metadata = { title: sections.outcomes.label };
 export default function OutcomesPage() {
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8 sm:py-16">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육성과</p>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">

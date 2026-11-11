@@ -10,7 +10,6 @@ export function SiteFooter() {
         <div>
           <p className="text-xl font-bold text-brand-navy">{siteConfig.name}</p>
           <p className="mt-2 leading-relaxed">{siteConfig.slogan}</p>
-          <p className="mt-2 text-xs font-semibold">학과 소개와 교육과정은 검토용 초안이며, 실제 모집·접수 정보가 아닙니다.</p>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
             {email && <span className="min-w-0 break-all">{email}</span>}
             {phone && <span>{phone}</span>}
@@ -26,9 +25,9 @@ export function SiteFooter() {
             ))}
           </nav>
           <details className="privacy-note">
-            <summary className="footer-link cursor-pointer">개인정보처리 안내 (준비 중)</summary>
+            <summary className="footer-link cursor-pointer">개인정보처리 안내 (초안)</summary>
             <p className="max-w-72 pb-2 leading-relaxed">
-              현재 공개 화면에서는 신청·문의 내용을 입력받거나 전송·저장하지 않습니다.
+              현재 시연 화면에서는 신청·문의 내용을 전송하거나 저장하지 않습니다.
               실제 접수에 적용할 안내는 서비스 개시 전에 게시합니다.
             </p>
           </details>

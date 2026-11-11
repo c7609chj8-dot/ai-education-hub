@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { coursePhotos } from "@/data/course-photos";
 import { courses } from "@/data/mock/courses";
+import { curriculumDetails } from "@/data/mock/curriculum-details";
 
 // 예시 강좌에 없는 주소는 첫 요청부터 404로 처리합니다.
 export const dynamicParams = false;
@@ -29,9 +30,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProgramDetailPage({ params }: PageProps) {
   const course = await getCourse(params);
   const photo = coursePhotos.find((item) => item.slug === course.slug);
+  const curriculum = curriculumDetails[course.id];
+  const objectives = curriculum?.objectives ?? course.objectives;
+  const weeks = curriculum?.weeks ?? course.weeks.map((title) => ({ title, practice: "" }));
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
           <Link href="/programs" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
             <span aria-hidden="true" className="me-2">←</span> 교육과정 목록
@@ -40,12 +44,12 @@ export default async function ProgramDetailPage({ params }: PageProps) {
           <h1 className="mt-3 max-w-4xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">
             {course.title}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{course.summary}</p>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{curriculum?.introduction ?? course.summary}</p>
           <p className="mt-3 text-sm font-semibold text-teal-ink">검토용 교육과정 초안 · 12주 구성은 미확정이며 교육시간·모집 일정은 별도 안내합니다.</p>
           <nav aria-label="과정 상세 바로가기" className="mt-6 flex flex-wrap gap-3">
             <a href="#course-overview" className="ui-button ui-button--secondary">교육목표</a>
             <a href="#course-curriculum" className="ui-button ui-button--secondary">주차별 교육내용</a>
-            <a href="#course-facts-heading" className="ui-button ui-button--secondary">과정 안내</a>
+            <a href="#course-facts-heading" className="ui-button ui-button--secondary">교육시간·일정</a>
           </nav>
         </div>
       </section>
@@ -62,7 +66,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
               )}
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">이런 내용을 배웁니다</h2>
               <ul className="mt-5 space-y-4">
-                {course.objectives.map((objective) => (
+                {objectives.map((objective) => (
                   <li key={objective} className="flex gap-3 leading-relaxed text-ink">
                     <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-brand-teal" />
                     <span>{objective}</span>
@@ -73,30 +77,55 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">핵심 교육내용 (초안)</h2>
               <ul className="mt-4 list-disc space-y-2 ps-5 text-ink">
-                {course.coreTopics.map((topic) => <li key={topic}>{topic}</li>)}
+                {(curriculum?.coreTopics ?? course.coreTopics).map((topic) => <li key={topic}>{topic}</li>)}
               </ul>
             </div>
             <div id="course-curriculum" className="scroll-mt-6 border-t border-line pt-8">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
-                <p className="text-sm font-semibold text-muted">검토용 초안 · {course.weeksCount}주</p>
+                <p className="text-sm font-semibold text-muted">검토용 초안 · {weeks.length}주</p>
               </div>
               <ol aria-label="주차별 교육내용" className="mt-5 grid gap-4 sm:grid-cols-2">
-                {course.weeks.map((title, index) => (
-                  <li key={`${index}-${title}`} className="curriculum-week flex gap-3">
+                {weeks.map((week, index) => (
+                  <li key={`${index}-${week.title}`} className="curriculum-week flex gap-3">
                     <span className="shrink-0 text-sm font-bold text-teal-ink">{index + 1}주</span>
-                    <span className="self-center leading-relaxed text-ink">{title}</span>
+                    <div className="min-w-0 flex-1 self-center leading-relaxed text-ink">
+                      <p className="font-semibold">{week.title}</p>
+                      {week.practice && <p className="mt-3 text-sm text-muted">실습과제: {week.practice}</p>}
+                    </div>
                   </li>
                 ))}
               </ol>
             </div>
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">최종 프로젝트와 결과물 (초안)</h2>
-              <p className="mt-4 leading-relaxed text-ink">{course.finalProject}</p>
+              <p className="mt-4 leading-relaxed text-ink">{curriculum?.finalProject ?? course.finalProject}</p>
+              {curriculum && (
+                <ul className="mt-5 space-y-3">
+                  {curriculum.deliverables.map((item) => (
+                    <li key={item} className="flex gap-3 leading-relaxed text-ink">
+                      <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-brand-teal" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">준비물과 안내</h2>
-              <p className="mt-4 leading-relaxed text-muted">도구·장비와 세부 운영 방식은 검토 중입니다. 기관 보유·무료 도구를 우선 검토하며 확정 후 안내합니다.</p>
+              <p className="mt-4 leading-relaxed text-muted">도구·장비는 검토용 후보입니다. 기관 보유·무료 도구를 우선 검토하며 확정 후 안내합니다.</p>
+              {curriculum && (
+                <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-brand-navy">소프트웨어</h3>
+                    <ul className="mt-3 space-y-2 text-ink">{curriculum.software.map((item) => <li key={item}>{item}</li>)}</ul>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-brand-navy">장비·자료</h3>
+                    <ul className="mt-3 space-y-2 text-ink">{curriculum.equipment.map((item) => <li key={item}>{item}</li>)}</ul>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -104,11 +133,11 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             <h2 id="course-facts-heading" className="text-xl font-bold text-brand-navy">과정 안내</h2>
             <dl className="mt-5 space-y-5">
               <div><dt className="text-sm font-semibold text-muted">교육 대상</dt><dd className="mt-1 font-semibold text-brand-navy">{course.audience}</dd></div>
-              <div><dt className="text-sm font-semibold text-muted">교육 기간</dt><dd className="mt-1 font-semibold text-brand-navy">{course.weeksCount}주차 교육과정 초안 · 실제 교육시간 미확정</dd></div>
+              <div><dt className="text-sm font-semibold text-muted">예정 교육시간</dt><dd className="mt-1 font-semibold text-brand-navy">미확정 · 안내 예정</dd></div>
               <div><dt className="text-sm font-semibold text-muted">예상 결과물</dt><dd className="mt-1 font-semibold text-brand-navy">{course.resultArtifact}</dd></div>
             </dl>
-            <p className="mt-6 border-t border-line pt-5 text-sm leading-relaxed text-muted">개강 일정과 모집 정보는 확정 후 안내합니다. 현재 수강신청은 제공하지 않습니다.</p>
-            <Link href="/schedule" className="ui-button ui-button--primary mt-4 w-full">모집 안내 준비 중 <span aria-hidden="true">→</span></Link>
+            <p className="mt-6 border-t border-line pt-5 text-sm leading-relaxed text-muted">개강 일정과 모집 정보는 확정 후 안내합니다.</p>
+            <Link href={`/schedule?course=${encodeURIComponent(course.id)}`} className="ui-button ui-button--primary mt-4 w-full">교육일정 확인하기 <span aria-hidden="true">→</span></Link>
           </aside>
         </div>
       </section>
