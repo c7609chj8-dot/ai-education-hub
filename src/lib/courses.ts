@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
 import { connection } from "next/server";
 import { courses as exampleCourses, type CoursePreview } from "@/data/mock/courses";
-import { getSupabaseAuthConfig } from "@/lib/supabase/config";
+import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
 export type CourseWeek = { weekNumber: number; title: string };
 export type CourseDetail = CoursePreview & { objectives: string[]; weeks: CourseWeek[]; durationHours: number | null };
@@ -25,7 +25,7 @@ export function courseDataIsExample(source: CourseSource) {
 }
 
 export function createPublishedDataClient() {
-  const config = getSupabaseAuthConfig();
+  const config = getSupabasePublicConfig();
   if (!config) throw new CourseDataUnavailable();
   return createClient(config.url, config.publishableKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

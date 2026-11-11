@@ -2,7 +2,7 @@
 // Production authentication requires a separately reviewed environment design.
 const DEV_ORIGIN = "https://uenvjqgylrevujdjpfed.supabase.co";
 
-export function getSupabaseAuthConfig() {
+export function getSupabasePublicConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !publishableKey?.startsWith("sb_publishable_")) return null;
@@ -14,4 +14,10 @@ export function getSupabaseAuthConfig() {
   } catch {
     return null;
   }
+}
+
+// Preview can validate anonymous catalog reads with account actions disabled.
+export function getSupabaseAuthConfig() {
+  if (process.env.ACADEMY_PREVIEW_READ_ONLY === "true") return null;
+  return getSupabasePublicConfig();
 }
