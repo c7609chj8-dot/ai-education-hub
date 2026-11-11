@@ -1,0 +1,27 @@
+// Fictional data and injected clients only; no remote database or actual credentials.
+import assert from "node:assert/strict";import fs from "node:fs";import vm from "node:vm";import ts from "typescript";
+const compile=(file,imports,globals={})=>{const code=ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;const testModule={exports:{}};vm.runInNewContext(code,{module:testModule,exports:testModule.exports,require:(name)=>name==="server-only"?{}:imports[name]??(()=>{throw Error("Unexpected import "+name)})(),FormData,URL,Date,Number,Array,...globals});return testModule.exports;};
+const {submitInquiry}=compile("src/lib/inquiries/submission.ts",{});
+const request="11111111-1111-4111-8111-111111111111",actor="22222222-2222-4222-8222-222222222222",id="33333333-3333-4333-8333-333333333333";
+const values={request_id:request,category:"course",name:"Fictional",email:"person@example.test",message:"Question",notice_version:"fixture-v1",consent:"on"};
+const make=(data=values)=>{const f=new FormData();for(const [k,v] of Object.entries(data))f.set(k,v);return f;};let commits=0;
+const deps={activeNoticeVersion:"fixture-v1",commit:async()=>{commits++;return "accepted";}};
+assert.equal((await submitInquiry(make(),deps)).status,"accepted");
+for(const x of [{name:""},{email:"bad"},{message:""},{message:"x".repeat(2001)},{category:"unknown"},{notice_version:"old"},{consent:""},{request_id:"invalid"}])assert.equal((await submitInquiry(make({...values,...x}),deps)).status,"invalid");
+const duplicate=make();duplicate.append("email","other@example.test");assert.equal((await submitInquiry(duplicate,deps)).status,"invalid");assert.equal((await submitInquiry(make(),{...deps,activeNoticeVersion:null})).status,"invalid");assert.equal(commits,1);
+let stored=false;const lost={activeNoticeVersion:"fixture-v1",commit:async()=>{if(stored)return "accepted";stored=true;throw Error("fixture response lost")}};
+assert.equal((await submitInquiry(make(),lost)).status,"unknown");assert.equal((await submitInquiry(make(),lost)).status,"accepted");
+let identity={access:"allowed",userId:actor},config={url:"https://uenvjqgylrevujdjpfed.supabase.co"},creations=0,calls=[];
+const env={ACADEMY_ADMIN_INQUIRIES_ENABLED:"true",SUPABASE_SECRET_KEY:"sb_secret_"+"fixture"};
+const summary={id,category:"course",status:"received",created_at:"2026-11-08T01:00:00+00:00",masked_name:"F**",last_change_at:null,last_actor_id:null};
+let response={data:{items:[summary]},error:null};const mock={createClient:()=>{creations++;return {rpc:async(name,args)=>{calls.push({name,args});return response}}}};
+const api=compile("src/lib/admin/inquiries.ts",{"@supabase/supabase-js":mock,"@/lib/supabase/config":{getSupabaseAuthConfig:()=>config},"./access":{getAdminIdentity:async()=>identity}},{process:{env}});
+const search=()=>{const f=new FormData();f.set("search","");f.set("before_at","");f.set("before_id","");return f};const detail=()=>{const f=new FormData();f.set("id",id);f.set("actor_id",request);return f};
+identity={access:"forbidden"};assert.equal((await api.readAdminInquiry(detail())).ok,false);assert.equal(creations,0);
+identity={access:"allowed",userId:actor};env.ACADEMY_ADMIN_INQUIRIES_ENABLED="false";assert.equal((await api.searchAdminInquiries(search())).ok,false);assert.equal(creations,0);
+env.ACADEMY_ADMIN_INQUIRIES_ENABLED="true";config={url:"https://other.supabase.co"};assert.equal((await api.searchAdminInquiries(search())).ok,false);assert.equal(creations,0);
+config={url:"https://uenvjqgylrevujdjpfed.supabase.co"};assert.equal((await api.searchAdminInquiries(search())).ok,true);response={data:{...summary,name:"Fictional",email:"person@example.test",message:"Question"},error:null};
+assert.equal((await api.readAdminInquiry(detail())).ok,true);assert.equal(calls.at(-1).args.p_actor_id,actor);
+response={data:{result:"in_progress",changed_at:"2026-11-08T01:00:00+00:00",actor_id:actor},error:null};const advance=detail();advance.set("expected","received");assert.equal((await api.advanceAdminInquiry(advance)).ok,true);assert.equal(calls.at(-1).args.p_actor_id,actor);
+response={data:{result:"completed",changed_at:"2026-11-08T01:00:00+00:00",actor_id:request},error:null};assert.equal((await api.advanceAdminInquiry(advance)).ok,false);
+console.log("PASS: inquiry validation and uncertain retries; admin identity, project gate and audit actor integrity");

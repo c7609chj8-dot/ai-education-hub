@@ -1,13 +1,20 @@
+import {contentSource} from "@/lib/content/public";
+import {ContentUnavailable,PublishedContent} from "@/components/content/published-content";
 import { sections } from "@/config/navigation";
 import { sampleNews } from "@/data/mock/information";
 import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: sections.news.label };
+export const dynamic = "force-dynamic";
 
 export default function NewsPage() {
+  let source: "mock" | "supabase" | null = null;
+  try { source = contentSource(); } catch { /* Invalid configuration fails closed. */ }
+  if (!source) return <ContentUnavailable/>;
+  if (source === "supabase") return <PublishedContent kind="news"/>;
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-4xl px-4 py-14 sm:px-8 sm:py-16">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육정보</p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-brand-navy sm:text-5xl">공지사항</h1>

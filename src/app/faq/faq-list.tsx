@@ -12,13 +12,13 @@ type FaqItem = {
   linkLabel?: string;
 };
 
-export function FaqList({ items }: { items: FaqItem[] }) {
+export function FaqList({ items, example = true }: { items: FaqItem[]; example?: boolean }) {
   const [category, setCategory] = useState("전체");
   const categories = ["전체", ...new Set(items.map((item) => item.category))];
   const visible = category === "전체" ? items : items.filter((item) => item.category === category);
 
   return (
-    <section aria-label="질문 예시 목록" className="bg-canvas">
+    <section aria-label={example ? "질문 예시 목록" : "질문 목록"} className="bg-canvas">
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-8 sm:py-16">
         <fieldset>
           <legend className="font-bold text-brand-navy">분야별 보기</legend>
@@ -31,7 +31,7 @@ export function FaqList({ items }: { items: FaqItem[] }) {
             ))}
           </div>
         </fieldset>
-        <p role="status" aria-atomic="true" className="mt-7 text-sm font-semibold text-muted">질문 예시 {visible.length}개</p>
+        <p role="status" aria-atomic="true" className="mt-7 text-sm font-semibold text-muted">질문{example ? " 예시" : ""} {visible.length}개</p>
         <ul className="mt-4 space-y-3">
           {visible.map((item) => (
             <li key={item.id}>

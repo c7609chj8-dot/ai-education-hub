@@ -5,7 +5,7 @@
 ## 현재 배포와 인수인계
 
 [Vercel 시연 사이트](https://ai-education-hub-ten.vercel.app)는 GitHub `main`과 연결되어 있습니다. 신청·문의·관리자는 실제 접수나 저장이 없는 시연이며, 관리자 시연에는 인증이 없습니다. [20일 작업 결과와 인수인계](docs/day20-handover.md)에서 화면 목록·검수 결과·남은 문제와 후속 Supabase 연계 계획을 확인할 수 있습니다.
-후속 실제 운영 기능의 범위와 예상 일정은 [백엔드 구축 작업계획서](docs/backend-implementation-plan.md)를 참고하세요. 1일차 업무 흐름과 미확정 정책은 [백엔드 1일차 요구사항](docs/backend-day01-requirements.md)에 정리했습니다. [2일차 환경·배포 설계](docs/backend-day02-environments.md)도 확인할 수 있습니다. [3일차 데이터 모델·정원·보존 정책 초안](docs/backend-day03-data-model.md)도 정리했습니다.
+후속 실제 운영 기능의 범위와 예상 일정은 [백엔드 구축 작업계획서](docs/backend-implementation-plan.md)를 참고하세요. 1일차 업무 흐름과 미확정 정책은 [백엔드 1일차 요구사항](docs/backend-day01-requirements.md)에 정리했습니다. [2일차 환경·배포 설계](docs/backend-day02-environments.md)도 확인할 수 있습니다. [3일차 데이터 모델·정원·보존 정책 초안](docs/backend-day03-data-model.md)도 정리했습니다. [4일차 개발 환경 준비 현황](docs/backend-day04-setup.md)은 작업 브랜치에서 확인할 수 있습니다.
 
 ## 로컬 실행
 

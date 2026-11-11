@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { coursePhotos } from "@/data/course-photos";
+import { getPublicBrand } from "@/lib/brand/public";
+import { listCourses } from "@/lib/courses";
 import { EducationIntro } from "./education-intro";
 import { HeroGallery } from "./hero-gallery";
 import { HomePreviews } from "@/components/home-previews";
@@ -11,25 +14,36 @@ const learningValues = [
   { title: "삶과 일에 이어지는 결과", description: "배운 내용을 생활과 업무에 적용할 수 있는 결과물로 정리합니다." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const courseRequest = listCourses();
+  const [{ brand }, courseResult] = await Promise.all([
+    getPublicBrand(),
+    courseRequest.then((result) => result, () => null),
+  ]);
+  const photos = coursePhotos.flatMap((photo) => {
+    const course = courseResult?.courses.find((item) => item.slug === photo.slug);
+    return course ? [{ ...photo, title: course.title }] : [];
+  });
+
   return (
     <>
-      <section className="border-b border-line bg-canvas">
+      <section className="home-hero border-b border-line">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:gap-14 lg:py-20">
           <div>
-            <p className="text-sm font-bold tracking-wide text-teal-ink">모두를 위한 AI 교육</p>
-            <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">
-              AI를 배워,<br className="hidden sm:block" /> 생활과 일에 써보세요
+            <p className="hero-kicker text-sm font-bold tracking-wide">모두를 위한 AI 교육</p>
+            <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+              {brand.slogan}
             </h1>
-            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted sm:text-lg">
-              챗GPT 입문부터 업무 개선, 전자책 제작, 소상공인 마케팅까지 직접 실습합니다.
+            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-slate-200 sm:text-lg">
+              경영·음악·항공영상·멀티미디어·프로그래밍·광고영상, 여섯 분야를 AI로 연결하는 배움을 준비합니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/programs" className="ui-button ui-button--primary">교육과정 보기 <span aria-hidden="true">→</span></Link>
               <Link href="/schedule" className="ui-button ui-button--secondary bg-white">교육일정 보기</Link>
             </div>
+            <p className="hero-note mt-6 text-sm">교육과정 검토 중 · 교육시간과 모집 일정은 확정 후 안내합니다.</p>
           </div>
-          <HeroGallery />
+          {photos.length > 0 && <HeroGallery key={photos.map((photo) => photo.slug).join(",")} photos={photos} />}
         </div>
       </section>
 
@@ -52,7 +66,7 @@ export default function Home() {
           <EducationIntro />
         </div>
       </section>
-      <HomePreviews />
+      <HomePreviews courseRequest={courseRequest} />
     </>
   );
 }

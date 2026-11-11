@@ -1,7 +1,10 @@
+import {contentSource} from "@/lib/content/public";
+import {ContentUnavailable,PublishedContent} from "@/components/content/published-content";
 import Link from "next/link";
 import { sections } from "@/config/navigation";
 
 export const metadata = { title: sections.partnership.label };
+export const dynamic = "force-dynamic";
 
 const audiences = [
   { title: "대학·교육기관", description: "학습자의 수준과 교육 목표에 맞춘 AI 활용 교육을 함께 기획합니다." },
@@ -11,9 +14,13 @@ const audiences = [
 const steps = ["교육 대상과 목표 살펴보기", "교육 내용과 운영 방식 협의", "일정과 세부 내용 조율"];
 
 export default function PartnershipPage() {
+  let source: "mock" | "supabase" | null = null;
+  try { source = contentSource(); } catch { /* Invalid configuration fails closed. */ }
+  if (!source) return <ContentUnavailable/>;
+  if (source === "supabase") return <PublishedContent kind="partnership"/>;
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8 sm:py-16">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육협력</p>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">함께 만드는 AI 배움의 기회</h1>
