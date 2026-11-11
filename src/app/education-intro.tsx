@@ -23,8 +23,8 @@ export function EducationIntro() {
         <Button variant="secondary" disabled>수강 신청 준비 중</Button>
       </div>
       <div id={panelId} hidden={!expanded} className="mt-6 border-s-4 border-brand-teal ps-4">
-        <p className="font-semibold text-brand-navy">초기 과정은 12주 동안 주 2시간으로 준비하고 있습니다.</p>
-        <p className="mt-1 text-muted">생활과 업무에 활용할 수 있도록 실습을 중심으로 진행할 예정입니다.</p>
+        <p className="font-semibold text-brand-navy">6개 학과의 교육과정은 모두 검토용 12주차 초안입니다.</p>
+        <p className="mt-1 text-muted">교육시간·운영 방식·모집 일정은 확정하지 않았으며, 실제 접수 기능도 아직 제공하지 않습니다.</p>
       </div>
     </div>
   );

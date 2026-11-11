@@ -5,7 +5,7 @@ import { courses, sampleOfferings } from "@/data/mock/courses";
 import { demoApplications } from "@/data/mock/admin";
 import { siteConfig } from "@/config/site";
 
-export type Program = { id: string; slug: string; title: string; category: string; summary: string; weeksCount: number; durationHours: number; audience: string };
+export type Program = { id: string; slug: string; title: string; category: string; summary: string; weeksCount: number; durationHours: number | null; audience: string };
 export type Offering = { id: string; courseId: string; startDate: string; location: string; status: string };
 export type Application = { id: string; label: string; courseId: string; state: string };
 export type BrandPreview = { name: string; slogan: string; contactNotice: string };

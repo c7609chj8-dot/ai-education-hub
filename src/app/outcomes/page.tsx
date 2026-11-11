@@ -16,10 +16,10 @@ export default function OutcomesPage() {
             배운 것을 나만의 결과물로
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-            과정에서 만들 수 있는 결과물의 모습을 살펴보세요.
+            검토용 교육과정에서 목표로 하는 결과물의 모습을 살펴보세요.
           </p>
           <p className="mt-3 text-sm font-semibold leading-relaxed text-teal-ink">
-            이 페이지의 결과물과 후기는 시연용 예시입니다.
+            이 페이지의 결과물과 후기는 실제 수료생 성과가 아닌 검토용 화면 예시입니다.
           </p>
         </div>
       </section>
@@ -27,7 +27,7 @@ export default function OutcomesPage() {
       <section aria-labelledby="gallery-heading" className="bg-canvas">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-20">
           <h2 id="gallery-heading" className="text-3xl font-bold tracking-tight text-brand-navy">결과물 갤러리</h2>
-          <p className="mt-3 max-w-2xl leading-relaxed text-muted">각 과정의 목표에 맞춰 정리할 수 있는 결과물 예시입니다.</p>
+          <p className="mt-3 max-w-2xl leading-relaxed text-muted">각 학과의 검토용 교육과정에서 목표로 하는 결과물 예시입니다.</p>
           <div className="mt-9 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {sampleOutcomes.map((course) => {
               const visual = sampleOutcomeVisuals[course.id];

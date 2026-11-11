@@ -193,3 +193,35 @@
     @apply mx-5 border-t border-line pb-6 pt-4 leading-relaxed text-ink sm:mx-6;
   }
 }
+
+/* Public pages share these treatments; blocked admin pages retain their own layout. */
+@layer components {
+  .page-intro {
+    background: linear-gradient(115deg, #e9f3f2, #f7f9fc 65%);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .page-intro h1,
+  .home-hero h1 {
+    text-wrap: balance;
+  }
+
+  .home-hero {
+    background: radial-gradient(ellipse at 85% 5%, #214d66, transparent 60%), #102d47;
+  }
+
+  .home-hero .hero-kicker { color: #a4e6d9; }
+  .home-hero .hero-note { color: #d9e5ee; }
+  .home-hero figure { @apply rounded-card border border-white/20 bg-surface p-3 shadow-xl sm:p-4; }
+  .home-hero :focus-visible { outline-color: #ffca80; }
+  .home-hero figure :focus-visible { outline-color: var(--color-brand-navy); }
+  .course-card { box-shadow: 0 6px 22px #0e355809; }
+  .course-card:focus-within { border-color: var(--color-brand-blue); }
+  .curriculum-week { @apply rounded-card border border-line bg-surface p-5; }
+  .curriculum-week > span { @apply flex size-10 items-center justify-center rounded-full bg-teal-soft; }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .course-card { transition: box-shadow 160ms ease, transform 160ms ease; }
+    .course-card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px #0e355812; }
+  }
+}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EducationIntro } from "./education-intro";
 import { HeroGallery } from "./hero-gallery";
 import { HomePreviews } from "@/components/home-previews";
+import { siteConfig } from "@/config/site";
 
 export const revalidate = 3600;
 
@@ -14,20 +15,21 @@ const learningValues = [
 export default function Home() {
   return (
     <>
-      <section className="border-b border-line bg-canvas">
+      <section className="home-hero border-b border-line">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:gap-14 lg:py-20">
           <div>
-            <p className="text-sm font-bold tracking-wide text-teal-ink">모두를 위한 AI 교육</p>
-            <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">
-              AI를 배워,<br className="hidden sm:block" /> 생활과 일에 써보세요
+            <p className="hero-kicker text-sm font-bold tracking-wide">AI융합대학</p>
+            <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+              {siteConfig.slogan}
             </h1>
-            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted sm:text-lg">
-              챗GPT 입문부터 업무 개선, 전자책 제작, 소상공인 마케팅까지 직접 실습합니다.
+            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-slate-200 sm:text-lg">
+              경영·음악·항공영상·멀티미디어·프로그래밍·광고영상, 여섯 분야를 AI로 연결하는 배움을 준비합니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/programs" className="ui-button ui-button--primary">교육과정 보기 <span aria-hidden="true">→</span></Link>
               <Link href="/schedule" className="ui-button ui-button--secondary bg-white">교육일정 보기</Link>
             </div>
+            <p className="hero-note mt-6 text-sm">학과 소개와 12주 교육과정은 검토용 초안이며, 교육시간과 모집 일정은 확정 후 안내합니다.</p>
           </div>
           <HeroGallery />
         </div>

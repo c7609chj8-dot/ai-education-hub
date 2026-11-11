@@ -7,7 +7,7 @@ export function CourseCard({ course }: { course: CoursePreview }) {
   const photo = coursePhotos.find((item) => item.slug === course.slug);
 
   return (
-    <article className="flex flex-col rounded-card border border-line bg-surface">
+    <article className="course-card flex flex-col rounded-card border border-line bg-surface">
       {photo && (
         <Image
           src={`/images/hero/${photo.slug}.jpg`}
@@ -21,13 +21,14 @@ export function CourseCard({ course }: { course: CoursePreview }) {
       <div className="flex flex-1 flex-col px-5 pb-4 pt-5 sm:px-6">
         <p className="text-sm font-semibold text-teal-ink">{course.category}</p>
         <h3 className="mt-2 text-xl font-bold leading-snug text-brand-navy">{course.title}</h3>
+        <p className="mt-2 text-sm font-semibold text-muted">검토용 교육과정 초안</p>
         <dl className="mb-3 mt-4 space-y-3 text-[17px] leading-relaxed sm:text-base">
           <div>
             <dt className="text-sm font-semibold text-muted">추천 대상</dt>
             <dd className="text-ink">{course.audience}</dd>
           </div>
           <div className="rounded-control bg-teal-soft px-3 py-2">
-            <dt className="text-sm font-semibold text-teal-ink">완성 결과물</dt>
+            <dt className="text-sm font-semibold text-teal-ink">예상 결과물</dt>
             <dd className="font-semibold text-brand-navy">{course.resultArtifact}</dd>
           </div>
         </dl>
