@@ -1,0 +1,33 @@
+// Validation contract only; no endpoint, database connection, or real personal data.
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import vm from "node:vm";
+import ts from "typescript";
+const code = ts.transpileModule(fs.readFileSync("src/lib/applications/validation.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+const testModule = { exports: {} };
+vm.runInNewContext(code, { module: testModule, exports: testModule.exports, require: (name) => { if (name !== "server-only") throw Error("Unexpected import"); return {}; }, FormData, Date, Number });
+const { validateApplicationRequest } = testModule.exports;
+const id = "11111111-1111-4111-8111-111111111111";
+const valid = { offering_id: id, name: "가상 신청자", contact: "010-0000-0000", notice_version: "test-v1", consent: "on" };
+const snapshot = { id, isPublic: true, status: "open", coursePublicationState: "published", enrollmentOpensAt: "2026-11-07T00:00:00+09:00", enrollmentClosesAt: "2026-11-08T00:00:00+09:00" };
+const at = (value) => new Date(value);
+const form = (value = valid) => { const f = new FormData(); for (const [k,v] of Object.entries(value)) f.append(k,v); return f; };
+const verify = (f = form(), s = snapshot, v = "test-v1", n = at("2026-11-07T01:00:00+09:00")) => validateApplicationRequest(f,s,v,n);
+assert.equal(verify().ok, true);
+assert.equal(verify(form(),snapshot,"test-v1",at("2026-11-07T00:00:00+09:00")).ok,true);
+assert.equal(verify(form(),snapshot,"test-v1",at("2026-11-08T00:00:00+09:00")).ok,false);
+assert.equal(verify(form(),snapshot,"test-v1",at("2026-11-06T23:59:59+09:00")).ok,false);
+assert.equal(verify(form(),snapshot,null).reason,"notice_unavailable");
+for (const changes of [{offering_id:"invalid"},{name:"   "},{name:"가".repeat(101)},{name:"가\n나"},{contact:"abc"},{contact:"010-0000"},{notice_version:"stale"},{consent:""}]) assert.equal(verify(form({...valid,...changes})).ok,false);
+const duplicated=form();duplicated.append("consent","on");assert.equal(verify(duplicated).ok,false);
+const forged=form();forged.append("status","open");forged.append("is_public","true");
+for (const changes of [{id:"22222222-2222-4222-8222-222222222222"},{isPublic:false},{status:"closed"},{status:"draft"},{coursePublicationState:"draft"},{enrollmentOpensAt:null},{enrollmentClosesAt:null},{enrollmentOpensAt:"bad"},{enrollmentClosesAt:"2026-11-06T00:00:00Z"}]) assert.equal(verify(forged,{...snapshot,...changes}).reason,"offering_unavailable");
+for (const changes of [
+  {enrollmentOpensAt:"2026-02-30T00:00:00+09:00"},
+  {enrollmentClosesAt:"2026-11-31T00:00:00+09:00"},
+  {enrollmentOpensAt:"2026-11-07T24:00:00+09:00"},
+  {enrollmentClosesAt:snapshot.enrollmentOpensAt},
+]) assert.equal(verify(form(),{...snapshot,...changes}).reason,"offering_unavailable");
+assert.equal(verify(form(), {...snapshot, enrollmentOpensAt:"2028-02-29T09:00:00+09:00", enrollmentClosesAt:"2028-03-01T09:00:00+09:00"}, "test-v1", at("2028-02-29T09:00:00+09:00")).ok, true);
+assert.equal(verify(form(),null).ok,false);assert.equal(verify(form(),snapshot,"test-v1",new Date("invalid")).ok,false);
+console.log("PASS: server validation rejects invalid, duplicated and stale inputs and unavailable offerings; recruitment time boundaries are fail-closed");

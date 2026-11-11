@@ -4,11 +4,11 @@ import Image from "next/image";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 import Link from "next/link";
-import { coursePhotos as photos } from "@/data/course-photos";
+import type { coursePhotos } from "@/data/course-photos";
 
 const arrowClass = "grid size-11 cursor-pointer place-items-center rounded-full border border-line bg-surface text-xl text-brand-navy hover:bg-canvas";
 
-export function HeroGallery() {
+export function HeroGallery({ photos }: { photos: typeof coursePhotos }) {
   const viewportId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);

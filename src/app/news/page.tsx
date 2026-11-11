@@ -1,10 +1,17 @@
+import {contentSource} from "@/lib/content/public";
+import {ContentUnavailable,PublishedContent} from "@/components/content/published-content";
 import { sections } from "@/config/navigation";
 import { sampleNews } from "@/data/mock/information";
 import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: sections.news.label };
+export const dynamic = "force-dynamic";
 
 export default function NewsPage() {
+  let source: "mock" | "supabase" | null = null;
+  try { source = contentSource(); } catch { /* Invalid configuration fails closed. */ }
+  if (!source) return <ContentUnavailable/>;
+  if (source === "supabase") return <PublishedContent kind="news"/>;
   return (
     <>
       <section className="bg-surface">
