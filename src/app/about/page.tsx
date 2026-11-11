@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { sections } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
+import { getPublicBrand } from "@/lib/brand/public";
 
 export const metadata = { title: sections.about.label };
 
@@ -10,7 +10,8 @@ const principles = [
   { title: "안전하고 책임 있게", description: "정보의 출처를 확인하고 개인정보와 저작권을 고려하며 활용합니다." },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const {brand} = await getPublicBrand();
   return (
     <>
       <section className="bg-surface">
@@ -21,7 +22,7 @@ export default function AboutPage() {
               배움의 가능성을<br className="hidden sm:block" /> 일상 가까이
             </h1>
             <div className="max-w-xl text-lg leading-relaxed text-muted">
-              <p>{siteConfig.name}{siteConfig.nameQualifier && ` (${siteConfig.nameQualifier})`}는 누구나 자신의 삶과 일에 AI를 활용할 수 있도록 돕는 교육을 준비하고 있습니다.</p>
+              <p>{brand.name}는 누구나 자신의 삶과 일에 AI를 활용할 수 있도록 돕는 교육을 준비하고 있습니다.</p>
               <p className="mt-4">처음 시작하는 분부터 새로운 활용법을 찾는 분까지, 각자의 목표를 향해 함께 배웁니다.</p>
             </div>
           </div>

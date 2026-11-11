@@ -1,3 +1,5 @@
+import {assetSource} from "@/lib/assets/public";
+import {AssetsUnavailable,PublishedAssets} from "@/components/assets/published-assets";
 import Image from "next/image";
 import Link from "next/link";
 import { sections } from "@/config/navigation";
@@ -5,8 +7,11 @@ import { sampleOutcomes } from "@/data/mock/courses";
 import { sampleOutcomeVisuals, sampleTestimonials } from "@/data/mock/outcomes";
 
 export const metadata = { title: sections.outcomes.label };
+export const dynamic = "force-dynamic";
 
 export default function OutcomesPage() {
+  let source: "mock" | "supabase" | null = null;try { source=assetSource(); } catch { /* Invalid configuration fails closed. */ }
+  if(!source)return <AssetsUnavailable/>;if(source==="supabase")return <PublishedAssets kind="outcome"/>;
   return (
     <>
       <section className="bg-surface">

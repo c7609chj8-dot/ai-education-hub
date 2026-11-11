@@ -1,0 +1,77 @@
+-- REVIEW ONLY: actual restoration requires a separate explicit approval.
+-- postgres has BYPASSRLS: this path explicitly bypasses row-level security.
+-- Independently verify project routing and the local snapshot SHA-256 first.
+\set ON_ERROR_STOP on
+\set VERBOSITY terse
+\if :{?b039_restore}
+\else
+DO $blocked$ BEGIN RAISE EXCEPTION 'Explicit restoration approval is required'; END $blocked$;
+\endif
+\if :b039_restore
+\else
+DO $blocked$ BEGIN RAISE EXCEPTION 'Explicit restoration approval is required'; END $blocked$;
+\endif
+
+BEGIN;
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '30s';
+SET LOCAL search_path = pg_catalog;
+LOCK TABLE academy.courses IN SHARE MODE;
+LOCK TABLE academy.course_weeks IN SHARE MODE;
+LOCK TABLE academy.offerings IN ACCESS EXCLUSIVE MODE;
+CREATE TEMP TABLE b039_snapshot(payload jsonb NOT NULL) ON COMMIT DROP;
+\copy b039_snapshot(payload) FROM 'C:/Users/USER/Documents/ai-education-hub-dev-backups/b038-test-offering-snapshot-20261110-222128/offering-test-row.json' WITH (FORMAT csv, DELIMITER E'\x1f', QUOTE E'\x1e', ENCODING 'UTF8')
+
+DO $preflight$
+DECLARE expected_versions text[] := ARRAY['20261107100302','20261108064422','20261108105949','20261108143123','20261108183527'];
+BEGIN
+  IF current_database() <> 'postgres' OR current_user <> 'postgres'
+     OR NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=current_user AND rolbypassrls)
+     OR (SELECT array_agg(version::text ORDER BY version::text) FROM supabase_migrations.schema_migrations) IS DISTINCT FROM expected_versions
+     OR (SELECT array_agg(attname::text ORDER BY attnum) FROM pg_attribute WHERE attrelid='academy.offerings'::regclass AND attnum>0 AND NOT attisdropped)
+        IS DISTINCT FROM ARRAY['id','course_id','start_date','end_date','enrollment_opens_at','enrollment_closes_at','location','capacity','status','created_at','is_public']
+     OR (SELECT count(*) FROM academy.courses) <> 5 OR (SELECT count(*) FROM academy.course_weeks) <> 60
+     OR (SELECT count(*) FROM academy.offerings) <> 0 OR (SELECT count(*) FROM auth.users) <> 2
+     OR (SELECT count(*) FROM private_education.offering_admins) <> 1
+     OR (SELECT count(*) FROM pg_temp.b039_snapshot) <> 1
+     OR EXISTS (SELECT 1 FROM pg_constraint WHERE contype='f' AND confrelid='academy.offerings'::regclass)
+     OR EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='academy.offerings'::regclass AND NOT tgisinternal)
+     OR EXISTS (SELECT 1 FROM pg_rewrite WHERE ev_class='academy.offerings'::regclass)
+     OR EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+       WHERE c.relkind IN ('r','p') AND n.nspname<>'information_schema' AND left(n.nspname,3)<>'pg_'
+       AND (c.relname ILIKE '%application%' OR c.relname ILIKE '%payment%'
+         OR c.relname ILIKE '%attendance%' OR c.relname ILIKE '%enrollment%'))
+     OR EXISTS (SELECT 1 FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+       WHERE c.relkind IN ('r','p') AND n.nspname<>'information_schema' AND left(n.nspname,3)<>'pg_'
+         AND a.attnum>0 AND NOT a.attisdropped
+         AND (a.attname ILIKE '%offering%' OR a.attname ILIKE '%cohort%' OR a.attname ILIKE '%schedule%'))
+     OR NOT EXISTS (
+       SELECT 1 FROM pg_temp.b039_snapshot s
+       CROSS JOIN LATERAL jsonb_populate_record(NULL::academy.offerings,s.payload->'row') r
+       WHERE s.payload->>'kind'='development_test_offering_snapshot_only'
+         AND s.payload->>'project_id'='uenvjqgylrevujdjpfed'
+         AND r.id='e9791c02-5bbf-4b55-86e3-7b6302cd6711'::uuid
+         AND r.course_id='7057c1b5-ff56-41e1-8d1a-63938f11a529'::uuid
+         AND r.start_date='2027-03-02'::date AND r.end_date='2027-05-18'::date
+         AND r.enrollment_opens_at='2027-02-01 00:00:00+00'::timestamptz
+         AND r.enrollment_closes_at='2027-02-28 09:00:00+00'::timestamptz
+         AND r.location='B-03-6 개발 시험 (수정)' AND r.capacity=10
+         AND r.status='draft' AND NOT r.is_public AND r.created_at IS NOT NULL)
+  THEN RAISE EXCEPTION 'Restore preflight failed; no insertion'; END IF;
+END $preflight$;
+
+DO $restore_one$
+DECLARE affected integer;
+BEGIN
+  INSERT INTO academy.offerings
+    SELECT (jsonb_populate_record(NULL::academy.offerings,s.payload->'row')).*
+    FROM pg_temp.b039_snapshot s;
+  GET DIAGNOSTICS affected=ROW_COUNT;
+  IF affected <> 1 OR (SELECT count(*) FROM academy.offerings) <> 1
+     OR (SELECT count(*) FROM academy.courses) <> 5 OR (SELECT count(*) FROM academy.course_weeks) <> 60
+     OR NOT EXISTS (SELECT 1 FROM academy.offerings o CROSS JOIN pg_temp.b039_snapshot s
+       WHERE o.id='e9791c02-5bbf-4b55-86e3-7b6302cd6711'::uuid
+         AND to_jsonb(o)=to_jsonb(jsonb_populate_record(NULL::academy.offerings,s.payload->'row')))
+  THEN RAISE EXCEPTION 'Restore verification failed; transaction will roll back'; END IF;
+END $restore_one$;
+COMMIT;
