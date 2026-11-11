@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "AI융합대학",
   nameQualifier: "",
-  slogan: "AI를 배워, 생활과 일에 써보세요",
+  slogan: "AI로 연결하는 지식, 융합으로 여는 미래",
   description: "누구나 시작하고, 실습으로 완성하는 AI 교육",
   logoSrc: "/images/ai-fusion-logo.png",
   heroImageSrc: "/images/ai-learning-illustration.webp",

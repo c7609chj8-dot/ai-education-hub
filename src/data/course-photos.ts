@@ -13,7 +13,7 @@ export const coursePhotos = [
   {
     "slug": "ai-aerial-video",
     "title": "AI 항공영상제작학과",
-    "alt": "야외에서 드론 조종기와 촬영 화면을 확인하는 학습자와 강사"
+    "alt": "드론과 모니터의 항공영상을 함께 검토하는 학습자와 강사"
   },
   {
     "slug": "ai-multimedia",

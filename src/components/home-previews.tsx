@@ -71,7 +71,7 @@ export async function HomePreviews({ courseRequest }: { courseRequest: ReturnTyp
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">교육일정</p>
-            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">다음 개강 일정</h2>
+            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">{scheduleExample ? "교육일정 예시" : "다음 개강 일정"}</h2>
             <p className="mt-4 leading-relaxed text-muted">{scheduleExample ? "교육 날짜와 장소는 예시이며, 실제 일정은 확정 후 안내합니다." : "개강 일정을 확인해 보세요."}</p>
             <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 일정 달력 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>

@@ -13,13 +13,13 @@ export function SiteHeader({ brand }: { brand: Brand }) {
           aria-label={`${brand.name} 홈`}
           className="flex min-h-11 min-w-0 items-center gap-2 rounded-control text-brand-navy sm:gap-3"
         >
-          <span className="relative block size-12 shrink-0 overflow-hidden rounded-control sm:size-14">
+          <span className="relative block size-20 shrink-0 rounded-control sm:size-24">
             <Image
               src={siteConfig.logoSrc}
               alt=""
               fill
-              sizes="104px"
-              className="scale-[1.8] object-cover"
+              sizes="(min-width: 640px) 96px, 80px"
+              className="rounded-control object-contain"
               unoptimized
             />
           </span>

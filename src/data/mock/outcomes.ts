@@ -19,7 +19,7 @@ export const sampleOutcomeVisuals: Record<string, OutcomeVisual> = {
     "description": "항공영상 포트폴리오의 구성 예시입니다. 실제 수강생 성과가 아닙니다.",
     "image": {
       "src": "/images/hero/ai-aerial-video.jpg",
-      "alt": "야외에서 드론 조종기와 촬영 화면을 확인하는 학습자와 강사을 표현한 AI 생성 이미지"
+      "alt": "드론과 모니터의 항공영상을 함께 검토하는 학습자와 강사을 표현한 AI 생성 이미지"
     }
   },
   "ai-multimedia": {
