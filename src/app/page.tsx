@@ -18,7 +18,7 @@ export default function Home() {
       <section className="home-hero border-b border-line">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:gap-14 lg:py-20">
           <div>
-            <p className="hero-kicker text-sm font-bold tracking-wide">AI융합대학</p>
+            <p className="hero-kicker text-sm font-bold tracking-wide">모두를 위한 AI 교육</p>
             <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
               {siteConfig.slogan}
             </h1>
@@ -29,7 +29,7 @@ export default function Home() {
               <Link href="/programs" className="ui-button ui-button--primary">교육과정 보기 <span aria-hidden="true">→</span></Link>
               <Link href="/schedule" className="ui-button ui-button--secondary bg-white">교육일정 보기</Link>
             </div>
-            <p className="hero-note mt-6 text-sm">학과 소개와 12주 교육과정은 검토용 초안이며, 교육시간과 모집 일정은 확정 후 안내합니다.</p>
+            <p className="hero-note mt-6 text-sm">교육과정 검토 중 · 교육시간과 모집 일정은 확정 후 안내합니다.</p>
           </div>
           <HeroGallery />
         </div>

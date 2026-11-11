@@ -218,7 +218,9 @@
   .course-card { box-shadow: 0 6px 22px #0e355809; }
   .course-card:focus-within { border-color: var(--color-brand-blue); }
   .curriculum-week { @apply rounded-card border border-line bg-surface p-5; }
-  .curriculum-week > span { @apply flex size-10 items-center justify-center rounded-full bg-teal-soft; }
+  .curriculum-week > span:first-child { @apply flex size-10 shrink-0 items-center justify-center rounded-full bg-teal-soft; }
+  .curriculum-week p + p { @apply border-t border-line pt-3; }
+  .calendar-day--event[aria-pressed="true"] { box-shadow: 0 0 0 2px white, 0 0 0 3px var(--color-brand-navy); }
 
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .course-card { transition: box-shadow 160ms ease, transform 160ms ease; }

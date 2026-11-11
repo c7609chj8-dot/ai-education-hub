@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CourseCard } from "@/components/course-card";
-import { courses, sampleOutcomes } from "@/data/mock/courses";
+import { courses, sampleOfferings, sampleOutcomes } from "@/data/mock/courses";
+import { formatDate } from "@/lib/dates";
 
 export function HomePreviews() {
   return (
@@ -27,14 +28,18 @@ export function HomePreviews() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">교육일정</p>
-            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">모집 일정 준비 중</h2>
-            <p className="mt-4 leading-relaxed text-muted">실제 교육기수·모집 상태·정원·일정은 아직 공개하지 않습니다.</p>
-            <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">안내 확인하기 <span aria-hidden="true" className="ms-2">→</span></Link>
+            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">교육일정 예시</h2>
+            <p className="mt-4 leading-relaxed text-muted">교육 날짜와 장소는 시연용 예시이며, 실제 일정은 확정 후 안내합니다.</p>
+            <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 일정 달력 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
-          <div className="rounded-card border border-line bg-canvas p-6 sm:p-8">
-            <p className="text-sm font-semibold text-teal-ink">사전 공개 안내</p>
-            <h3 className="mt-3 text-xl font-bold text-brand-navy">수강신청과 개인정보 입력은 아직 열려 있지 않습니다.</h3>
-            <p className="mt-3 leading-relaxed text-muted">운영 기준과 실제 모집 정보가 확정되면 별도 안내와 함께 신청 기능을 제공합니다.</p>
+          <div className="grid gap-3">
+            {sampleOfferings.slice(0, 2).map((offering) => (
+              <article key={offering.id} className="rounded-card border border-line bg-canvas p-5 sm:p-6">
+                <p className="text-sm font-semibold text-teal-ink">일정 예시 · {offering.status}</p>
+                <h3 className="mt-2 text-lg font-bold text-brand-navy">{offering.course.title}</h3>
+                <p className="mt-2 text-[17px] text-ink"><time dateTime={offering.startDate}>{formatDate(offering.startDate)}</time> · {offering.location}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

@@ -14,6 +14,7 @@ function assert(condition, message) {
 }
 
 const courseSource = read("src/data/mock/courses.ts");
+const curriculumDetailSource = read("src/data/mock/curriculum-details.ts");
 const expectedSlugs = [
   "ai-management",
   "ai-music",
@@ -27,15 +28,20 @@ for (const slug of expectedSlugs) {
   assert(courseSource.includes(`slug: "${slug}"`), `Missing public curriculum: ${slug}`);
 }
 
-const weekBlocks = [...courseSource.matchAll(/weeks:\s*\[([\s\S]*?)\n\s*\],\n\s*finalProject:/g)];
-assert(weekBlocks.length === expectedSlugs.length, `Expected ${expectedSlugs.length} curriculum blocks, found ${weekBlocks.length}`);
+const detailedWeekCount = (curriculumDetailSource.match(/\{ title: "[^"]+", practice: "[^"]+" \}/g) ?? []).length;
+assert(detailedWeekCount === 72, `Expected 72 detailed curriculum weeks, found ${detailedWeekCount}`);
 
-const weekCounts = weekBlocks.map((block) => (block[1].match(/^\s*"[^"]+",$/gm) ?? []).length);
-for (const [index, count] of weekCounts.entries()) {
-  assert(count === 12, `Curriculum ${expectedSlugs[index]} must have 12 weeks, found ${count}`);
+const expectedOfferingIds = [
+  "demo-ai-management-01",
+  "demo-ai-music-01",
+  "demo-ai-aerial-video-01",
+  "demo-ai-multimedia-01",
+  "demo-ai-programming-01",
+  "demo-ai-advertising-video-01",
+];
+for (const offeringId of expectedOfferingIds) {
+  assert(courseSource.includes(`id: "${offeringId}"`), `Missing static example offering: ${offeringId}`);
 }
-assert(weekCounts.reduce((total, count) => total + count, 0) === 72, "Expected exactly 72 public curriculum weeks");
-assert(/sampleOfferings:\s*Offering\[\]\s*=\s*\[\s*\]/.test(courseSource), "Public pre-release must not expose offering data");
 
 const proxySource = read("src/proxy.ts");
 assert(proxySource.includes('"/admin/:path*"'), "Proxy must cover admin paths");
@@ -47,9 +53,10 @@ const inputSurface = [
   read("src/app/contact/page.tsx"),
 ].join("\n");
 assert(!/<(?:form|input|textarea|select)\b/.test(inputSurface), "Public application or contact page must not render a data-entry form");
+assert(!/from\s+["']@\/lib\/(?:supabase|courses|schedule-data)/.test(inputSurface), "Public application or contact page must not use a DB data source");
 
 const packageSource = read("package.json");
 assert(!packageSource.includes("@supabase/"), "Public pre-release must not add a Supabase client dependency");
 
-console.log(`Verified ${expectedSlugs.length} departments and ${weekCounts.reduce((total, count) => total + count, 0)} curriculum weeks.`);
-console.log("Verified empty offerings, no public personal-data form, and server-side admin/API blocking.");
+console.log(`Verified ${expectedSlugs.length} departments and ${detailedWeekCount} detailed curriculum weeks.`);
+console.log(`Verified ${expectedOfferingIds.length} static schedule examples, no public personal-data form, and server-side admin/API blocking.`);

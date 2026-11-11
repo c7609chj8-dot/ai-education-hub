@@ -13,7 +13,7 @@ const steps = ["교육 대상과 목표 살펴보기", "교육 내용과 운영 
 export default function PartnershipPage() {
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8 sm:py-16">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육협력</p>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">함께 만드는 AI 배움의 기회</h1>

@@ -221,7 +221,7 @@ export const courseCatalog = {
 
 export const courses = Object.values(courseCatalog);
 
-// 공개 사전 안내에서는 실제·예시 기수를 모두 노출하지 않습니다.
+// 공개 화면의 일정·신청 시연에만 쓰는 고정 예시입니다. 실제 DB 기수·모집·정원과 연결하지 않습니다.
 export type OfferingStatus = "모집중" | "마감임박" | "마감" | "예정";
 
 export type Offering = {
@@ -235,5 +235,12 @@ export type Offering = {
   status: OfferingStatus;
 };
 
-export const sampleOfferings: Offering[] = [];
+export const sampleOfferings: Offering[] = [
+  { id: "demo-ai-management-01", course: courseCatalog.management, startDate: "2026-11-16", endDate: "2027-02-01", location: "온라인", capacity: 20, enrolledCount: 8, status: "모집중" },
+  { id: "demo-ai-music-01", course: courseCatalog.music, startDate: "2026-11-16", endDate: "2027-02-01", location: "강의실", capacity: 20, enrolledCount: 18, status: "마감임박" },
+  { id: "demo-ai-aerial-video-01", course: courseCatalog.aerial, startDate: "2026-11-24", endDate: "2027-02-09", location: "온라인", capacity: 20, enrolledCount: 20, status: "마감" },
+  { id: "demo-ai-multimedia-01", course: courseCatalog.multimedia, startDate: "2026-12-02", endDate: "2027-02-17", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
+  { id: "demo-ai-programming-01", course: courseCatalog.programming, startDate: "2026-12-07", endDate: "2027-02-22", location: "온라인", capacity: 20, enrolledCount: 5, status: "모집중" },
+  { id: "demo-ai-advertising-video-01", course: courseCatalog.advertising, startDate: "2026-12-14", endDate: "2027-03-01", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
+];
 export const sampleOutcomes = courses.slice(0, 3);
