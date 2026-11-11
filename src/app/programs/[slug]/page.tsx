@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProgramDetailPage({ params }: PageProps) {
   const { course, example } = await getCourse(params);
+  const draft = example ? course.curriculumDraft : undefined;
   return (
     <>
       <section className="bg-surface">
@@ -32,7 +33,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             {course.title}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{course.summary}</p>
-          {example && <p className="mt-3 text-sm text-muted">예시 교육과정입니다.</p>}
+          {example && <p className="mt-3 text-sm font-semibold text-teal-ink">{draft ? "검토용 교육과정 초안 · 12주 구성은 미확정이며 교육시간·모집 일정은 별도 안내합니다." : "예시 교육과정입니다."}</p>}
         </div>
       </section>
 
@@ -50,23 +51,38 @@ export default async function ProgramDetailPage({ params }: PageProps) {
                 ))}
               </ul> : <p className="mt-4 text-muted">교육 목표를 준비하고 있습니다.</p>}
             </div>
+            {draft && <div className="border-t border-line pt-8">
+              <h2 className="text-2xl font-bold tracking-tight text-brand-navy">핵심 교육내용 (초안)</h2>
+              <ul className="mt-4 list-disc space-y-2 ps-5 text-ink">{draft.coreTopics.map((topic) => <li key={topic}>{topic}</li>)}</ul>
+            </div>}
             <div className="border-t border-line pt-8">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
-                <p className="text-sm font-semibold text-muted">{course.weeks.length > 0 ? `예정 · ${course.weeks.length}주` : "안내 예정"}</p>
+                <p className="text-sm font-semibold text-muted">{course.weeks.length > 0 ? `${draft ? "검토용 초안" : "예정"} · ${course.weeks.length}주` : "안내 예정"}</p>
               </div>
               {course.weeks.length > 0 ? <ol aria-label="주차별 교육내용" className="mt-5 grid gap-2 sm:grid-cols-2">
                 {course.weeks.map((week) => (
                   <li key={week.weekNumber} className="flex gap-3 rounded-control border border-line bg-surface px-4 py-3">
                     <span className="shrink-0 text-sm font-bold text-teal-ink">{week.weekNumber}주</span>
-                    <span className="leading-relaxed text-ink">{week.title}</span>
+                    <div className="min-w-0 leading-relaxed text-ink"><p className="font-semibold">{week.title}</p>{draft && <p className="mt-2 text-sm text-muted">실습과제: {draft.weeks[week.weekNumber - 1]?.practice}</p>}</div>
                   </li>
                 ))}
               </ol> : <p className="mt-4 text-muted">주차별 교육내용을 준비하고 있습니다.</p>}
             </div>
+            {draft && <div className="border-t border-line pt-8">
+              <h2 className="text-2xl font-bold tracking-tight text-brand-navy">최종 프로젝트와 결과물 (초안)</h2>
+              <p className="mt-4 leading-relaxed text-ink">{draft.finalProject}</p>
+              <ul className="mt-4 list-disc space-y-2 ps-5 text-ink">{draft.deliverables.map((item) => <li key={item}>{item}</li>)}</ul>
+            </div>}
             <div className="border-t border-line pt-8">
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">준비물과 안내</h2>
-              <p className="mt-4 leading-relaxed text-muted">준비물과 세부 운영 방식은 확정 후 안내합니다.</p>
+              {draft ? <>
+                <p className="mt-4 leading-relaxed text-muted">도구·장비는 검토용 후보입니다. 기관 보유·무료 도구를 우선 검토하며 확정 후 안내합니다.</p>
+                <h3 className="mt-5 font-bold text-brand-navy">소프트웨어</h3>
+                <ul className="mt-2 list-disc space-y-2 ps-5 text-ink">{draft.software.map((item) => <li key={item}>{item}</li>)}</ul>
+                <h3 className="mt-5 font-bold text-brand-navy">장비·자료</h3>
+                <ul className="mt-2 list-disc space-y-2 ps-5 text-ink">{draft.equipment.map((item) => <li key={item}>{item}</li>)}</ul>
+              </> : <p className="mt-4 leading-relaxed text-muted">준비물과 세부 운영 방식은 확정 후 안내합니다.</p>}
             </div>
           </div>
 
@@ -74,7 +90,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             <h2 id="course-facts-heading" className="text-xl font-bold text-brand-navy">과정 안내</h2>
             <dl className="mt-5 space-y-5">
               <div><dt className="text-sm font-semibold text-muted">교육 대상</dt><dd className="mt-1 font-semibold text-brand-navy">{course.audience}</dd></div>
-              <div><dt className="text-sm font-semibold text-muted">예정 교육시간</dt><dd className="mt-1 font-semibold text-brand-navy">{course.durationHours === null ? "안내 예정" : `총 ${course.durationHours}시간`}</dd></div>
+              <div><dt className="text-sm font-semibold text-muted">예정 교육시간</dt><dd className="mt-1 font-semibold text-brand-navy">{course.durationHours === null ? "미확정 · 안내 예정" : `총 ${course.durationHours}시간`}</dd></div>
               <div><dt className="text-sm font-semibold text-muted">예상 결과물</dt><dd className="mt-1 font-semibold text-brand-navy">{course.resultArtifact}</dd></div>
             </dl>
             <p className="mt-6 border-t border-line pt-5 text-sm leading-relaxed text-muted">개강 일정과 모집 정보는 확정 후 안내합니다.</p>

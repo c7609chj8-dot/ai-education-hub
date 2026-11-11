@@ -3,11 +3,11 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
 import { connection } from "next/server";
-import { courses as exampleCourses, legacyCourseCatalog, type CoursePreview } from "@/data/mock/courses";
+import { courses as exampleCourses, legacyCourseCatalog, type CoursePreview, type Course } from "@/data/mock/courses";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
 export type CourseWeek = { weekNumber: number; title: string };
-export type CourseDetail = CoursePreview & { objectives: string[]; weeks: CourseWeek[]; durationHours: number | null };
+export type CourseDetail = CoursePreview & { objectives: string[]; weeks: CourseWeek[]; durationHours: number | null; curriculumDraft?: Course["curriculumDraft"] };
 export type CourseSource = "mock" | "supabase";
 
 export class CourseDataUnavailable extends Error {
