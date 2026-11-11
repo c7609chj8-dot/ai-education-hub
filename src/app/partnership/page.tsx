@@ -19,7 +19,7 @@ export default function PartnershipPage() {
           <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">함께 만드는 AI 배움의 기회</h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">기관의 교육 목표와 참여자의 필요에 맞는 배움을 함께 준비합니다.</p>
           <p className="mt-3 text-sm font-semibold text-teal-ink">협력 내용과 운영 방식은 확정 전 안내입니다.</p>
-          <Link href="/contact" className="ui-button ui-button--primary mt-7">문의 시연 살펴보기 <span aria-hidden="true">→</span></Link>
+          <Link href="/contact" className="ui-button ui-button--primary mt-7">문의 안내 보기 <span aria-hidden="true">→</span></Link>
         </div>
       </section>
       <section aria-labelledby="partners-heading" className="bg-canvas">

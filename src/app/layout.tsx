@@ -10,8 +10,17 @@ const siteTitle = siteConfig.nameQualifier
   : siteConfig.name;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://ai-education-hub-ten.vercel.app"),
   title: { default: siteTitle, template: `%s | ${siteTitle}` },
-  description: siteConfig.description,
+  description: `${siteConfig.slogan}. ${siteConfig.description}`,
+  robots: { index: false, follow: false },
+  openGraph: {
+    title: siteTitle,
+    description: `${siteConfig.slogan}. ${siteConfig.description}`,
+    locale: "ko_KR",
+    type: "website",
+    images: [{ url: siteConfig.logoSrc, width: 1024, height: 1024, alt: `${siteConfig.name} 로고` }],
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

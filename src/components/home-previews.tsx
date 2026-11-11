@@ -1,20 +1,8 @@
 import Link from "next/link";
 import { CourseCard } from "@/components/course-card";
-import { courses, sampleOfferings, sampleOutcomes } from "@/data/mock/courses";
-import { formatDate } from "@/lib/dates";
+import { courses, sampleOutcomes } from "@/data/mock/courses";
 
 export function HomePreviews() {
-  const today = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  const upcomingOfferings = sampleOfferings
-    .filter((offering) => offering.startDate >= today)
-    .sort((first, second) => first.startDate.localeCompare(second.startDate))
-    .slice(0, 2);
-
   return (
     <>
       <section aria-labelledby="programs-heading" className="border-y border-line bg-canvas">
@@ -23,7 +11,7 @@ export function HomePreviews() {
             <div>
               <p className="text-sm font-bold tracking-wide text-teal-ink">교육과정</p>
               <h2 id="programs-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">관심에서 시작하는 AI 배움</h2>
-              <p className="mt-4 text-muted">생활부터 업무와 창업까지, 나에게 필요한 과정을 찾아보세요.</p>
+              <p className="mt-4 text-muted">6개 학과의 검토용 교육과정 초안을 살펴보세요.</p>
             </div>
             <Link href="/programs" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">교육과정 전체 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
@@ -39,24 +27,14 @@ export function HomePreviews() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
             <p className="text-sm font-bold tracking-wide text-teal-ink">교육일정</p>
-            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">다음 개강 일정</h2>
-            <p className="mt-4 leading-relaxed text-muted">교육 날짜와 장소는 예시이며, 실제 일정은 확정 후 안내합니다.</p>
-            <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">전체 일정 달력 보기 <span aria-hidden="true" className="ms-2">→</span></Link>
+            <h2 id="schedule-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">모집 일정 준비 중</h2>
+            <p className="mt-4 leading-relaxed text-muted">실제 교육기수·모집 상태·정원·일정은 아직 공개하지 않습니다.</p>
+            <Link href="/schedule" className="mt-4 inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">안내 확인하기 <span aria-hidden="true" className="ms-2">→</span></Link>
           </div>
-          <div className="grid gap-3">
-            {upcomingOfferings.map((offering) => (
-              <article key={offering.id} className="rounded-card border border-line bg-canvas p-5 sm:p-6">
-                <p className="text-sm font-semibold text-teal-ink">일정 예시 · 접수 준비 중</p>
-                <h3 className="mt-2 text-lg font-bold text-brand-navy">{offering.course.title}</h3>
-                <p className="mt-2 text-[17px] text-ink">
-                  <time dateTime={offering.startDate}>{formatDate(offering.startDate)}</time>
-                  {" · "}{offering.location}
-                </p>
-              </article>
-            ))}
-            {upcomingOfferings.length === 0 && (
-              <p className="rounded-card border border-line bg-canvas p-6 text-muted">다가오는 일정은 확정 후 안내합니다.</p>
-            )}
+          <div className="rounded-card border border-line bg-canvas p-6 sm:p-8">
+            <p className="text-sm font-semibold text-teal-ink">사전 공개 안내</p>
+            <h3 className="mt-3 text-xl font-bold text-brand-navy">수강신청과 개인정보 입력은 아직 열려 있지 않습니다.</h3>
+            <p className="mt-3 leading-relaxed text-muted">운영 기준과 실제 모집 정보가 확정되면 별도 안내와 함께 신청 기능을 제공합니다.</p>
           </div>
         </div>
       </section>
@@ -65,7 +43,7 @@ export function HomePreviews() {
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-20">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육성과</p>
           <h2 id="outcomes-heading" className="mt-3 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">배운 것을 나만의 결과물로</h2>
-          <p className="mt-4 text-muted">과정에서 만들 수 있는 결과물의 예시입니다.</p>
+            <p className="mt-4 text-muted">검토용 교육과정에서 목표로 하는 결과물의 예시입니다.</p>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {sampleOutcomes.map((course) => (
               <article key={course.id} className="rounded-card border border-line bg-surface p-6">

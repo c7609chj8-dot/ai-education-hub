@@ -1,64 +1,31 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { sampleOfferings } from "@/data/mock/courses";
-import { canDemoApply } from "@/lib/offerings";
-import { ApplicationForm } from "./application-form";
 
-// 예시 기수에 없는 주소는 첫 요청부터 404로 처리합니다.
-export const dynamicParams = false;
+export const metadata = { title: "수강신청 준비 중" };
 
-type PageProps = { params: Promise<{ offeringId: string }> };
-
-export function generateStaticParams() {
-  return sampleOfferings.map((offering) => ({ offeringId: offering.id }));
-}
-
-async function getOffering(params: PageProps["params"]) {
-  const { offeringId } = await params;
-  const offering = sampleOfferings.find((item) => item.id === offeringId);
-  if (!offering) notFound();
-  return offering;
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const offering = await getOffering(params);
-  return { title: `${offering.course.title} 신청 시연` };
-}
-
-export default async function ApplicationPage({ params }: PageProps) {
-  const offering = await getOffering(params);
-  const choices = sampleOfferings.filter(canDemoApply).map((item) => ({
-    id: item.id,
-    title: item.course.title,
-    startDate: item.startDate,
-    status: item.status,
-  }));
-
+export default function ApplicationPage() {
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
-          <Link href="/schedule" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
-            <span aria-hidden="true" className="me-2">←</span> 교육일정
-          </Link>
-          <p className="mt-5 text-sm font-semibold text-teal-ink">수강신청 시연</p>
-          <h1 className="mt-3 text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">신청 과정을 살펴보세요</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">가상의 기수를 선택하고 입력 검사를 체험할 수 있습니다.</p>
-          <p className="mt-3 font-semibold text-teal-ink">시연용 · 입력 내용은 실제로 접수하거나 저장하지 않습니다.</p>
+          <p className="text-sm font-semibold text-teal-ink">수강신청</p>
+          <h1 className="mt-3 text-4xl font-bold leading-tight tracking-tight text-brand-navy sm:text-5xl">수강신청 준비 중</h1>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
+            실제 교육기수와 모집 정보가 확정되기 전에는 신청을 받지 않습니다.
+          </p>
         </div>
       </section>
-      <section aria-label="신청 시연" className="bg-canvas">
+      <section aria-label="수강신청 준비 안내" className="bg-canvas">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
-          {canDemoApply(offering) ? (
-            <ApplicationForm initialOfferingId={offering.id} choices={choices} />
-          ) : (
-            <div className="rounded-card border border-line bg-surface p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-brand-navy">{offering.course.title}</h2>
-              <p className="mt-3 leading-relaxed text-muted">이 예시 기수는 {offering.status} 상태라 신청 시연을 시작할 수 없습니다.</p>
-              <Link href="/schedule" className="ui-button ui-button--secondary mt-5">다른 예시 일정 보기</Link>
+          <div className="rounded-card border border-line bg-surface p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-brand-navy">현재 개인정보를 입력하거나 전송할 수 없습니다.</h2>
+            <p className="mt-4 leading-relaxed text-muted">
+              이 공개 사전 안내에서는 실제 신청 저장, 대기자 등록, 연락처 수집을 제공하지 않습니다. 모집 기준과 개인정보 처리 안내가 확정되면 별도로 공지합니다.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/schedule" className="ui-button ui-button--primary">교육일정 안내 보기</Link>
+              <Link href="/programs" className="ui-button ui-button--secondary">교육과정 초안 보기</Link>
             </div>
-          )}
+          </div>
         </div>
       </section>
     </>
