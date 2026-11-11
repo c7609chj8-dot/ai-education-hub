@@ -7,7 +7,7 @@ import { SiteNavigation } from "./site-navigation";
 export function SiteHeader({ brand }: { brand: Brand }) {
   return (
     <header className="relative z-10 border-b border-line bg-surface">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-8 lg:min-h-20">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4 py-2 sm:px-8 lg:min-h-20">
         <Link
           href="/"
           aria-label={`${brand.name} 홈`}

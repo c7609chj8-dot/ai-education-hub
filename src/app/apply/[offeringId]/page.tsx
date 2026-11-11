@@ -40,7 +40,7 @@ export default async function ApplicationPage({ params }: PageProps) {
 
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
           <Link href="/schedule" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
             <span aria-hidden="true" className="me-2">←</span> 교육일정

@@ -14,7 +14,7 @@ export default function FaqPage() {
   if (source === "supabase") return <PublishedContent kind="faq"/>;
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-4xl px-4 py-14 sm:px-8 sm:py-16">
           <p className="text-sm font-bold tracking-wide text-teal-ink">교육정보</p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-brand-navy sm:text-5xl">자주 묻는 질문</h1>

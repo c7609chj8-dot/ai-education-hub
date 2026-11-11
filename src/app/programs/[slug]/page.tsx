@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCourse } from "@/lib/courses";
+import { coursePhotos } from "@/data/course-photos";
 
 export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
@@ -21,9 +23,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProgramDetailPage({ params }: PageProps) {
   const { course, example } = await getCourse(params);
   const draft = example ? course.curriculumDraft : undefined;
+  const photo = coursePhotos.find((item) => item.slug === course.slug);
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
           <Link href="/programs" className="inline-flex min-h-11 items-center rounded-control font-semibold text-brand-blue underline underline-offset-4">
             <span aria-hidden="true" className="me-2">←</span> 교육과정 목록
@@ -34,13 +37,22 @@ export default async function ProgramDetailPage({ params }: PageProps) {
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{course.summary}</p>
           {example && <p className="mt-3 text-sm font-semibold text-teal-ink">{draft ? "검토용 교육과정 초안 · 12주 구성은 미확정이며 교육시간·모집 일정은 별도 안내합니다." : "예시 교육과정입니다."}</p>}
+          <nav aria-label="과정 상세 바로가기" className="mt-6 flex flex-wrap gap-3">
+            <a href="#course-overview" className="ui-button ui-button--secondary">교육목표</a>
+            <a href="#course-curriculum" className="ui-button ui-button--secondary">주차별 교육내용</a>
+            <a href="#course-facts-heading" className="ui-button ui-button--secondary">교육시간·일정</a>
+          </nav>
         </div>
       </section>
 
       <section aria-label="과정 소개" className="bg-canvas">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-12">
           <div className="space-y-10">
-            <div>
+            <div id="course-overview" className="scroll-mt-6">
+              {photo && <figure className="mb-8">
+                <Image src={`/images/hero/${photo.slug}.jpg`} alt={photo.alt} width={1200} height={800} sizes="(min-width: 1024px) 672px, 100vw" className="aspect-[3/2] w-full rounded-card object-cover" />
+                <figcaption className="mt-2 text-sm text-muted">AI로 생성한 교육 장면 예시</figcaption>
+              </figure>}
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">이런 내용을 배웁니다</h2>
               {course.objectives.length > 0 ? <ul className="mt-5 space-y-4">
                 {course.objectives.map((objective) => (
@@ -55,14 +67,14 @@ export default async function ProgramDetailPage({ params }: PageProps) {
               <h2 className="text-2xl font-bold tracking-tight text-brand-navy">핵심 교육내용 (초안)</h2>
               <ul className="mt-4 list-disc space-y-2 ps-5 text-ink">{draft.coreTopics.map((topic) => <li key={topic}>{topic}</li>)}</ul>
             </div>}
-            <div className="border-t border-line pt-8">
+            <div id="course-curriculum" className="scroll-mt-6 border-t border-line pt-8">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="text-2xl font-bold tracking-tight text-brand-navy">주차별 교육내용</h2>
                 <p className="text-sm font-semibold text-muted">{course.weeks.length > 0 ? `${draft ? "검토용 초안" : "예정"} · ${course.weeks.length}주` : "안내 예정"}</p>
               </div>
-              {course.weeks.length > 0 ? <ol aria-label="주차별 교육내용" className="mt-5 grid gap-2 sm:grid-cols-2">
+              {course.weeks.length > 0 ? <ol aria-label="주차별 교육내용" className="mt-5 grid gap-4 sm:grid-cols-2">
                 {course.weeks.map((week) => (
-                  <li key={week.weekNumber} className="flex gap-3 rounded-control border border-line bg-surface px-4 py-3">
+                  <li key={week.weekNumber} className="curriculum-week flex gap-3">
                     <span className="shrink-0 text-sm font-bold text-teal-ink">{week.weekNumber}주</span>
                     <div className="min-w-0 leading-relaxed text-ink"><p className="font-semibold">{week.title}</p>{draft && <p className="mt-2 text-sm text-muted">실습과제: {draft.weeks[week.weekNumber - 1]?.practice}</p>}</div>
                   </li>
@@ -86,7 +98,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <aside aria-labelledby="course-facts-heading" className="h-fit rounded-card border border-line bg-surface p-6 sm:p-8">
+          <aside aria-labelledby="course-facts-heading" className="h-fit rounded-card border border-line bg-surface p-6 shadow-sm sm:p-8 lg:sticky lg:top-6">
             <h2 id="course-facts-heading" className="text-xl font-bold text-brand-navy">과정 안내</h2>
             <dl className="mt-5 space-y-5">
               <div><dt className="text-sm font-semibold text-muted">교육 대상</dt><dd className="mt-1 font-semibold text-brand-navy">{course.audience}</dd></div>

@@ -88,10 +88,12 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
     <div className="rounded-card border border-line bg-surface p-6 sm:p-8">
       <h2 className="text-2xl font-bold text-brand-navy">신청 정보 입력</h2>
       <p className="mt-3 leading-relaxed text-muted">개인정보 대신 가상의 이름과 연락처를 입력해 주세요.</p>
-      <p className="mt-2 text-sm text-muted">필수 항목을 입력한 뒤 확인 버튼을 눌러 주세요.</p>
+      <p className="mt-2 text-sm text-muted">* 표시는 필수 항목입니다. 확인해도 실제 신청은 접수되지 않습니다.</p>
+      <noscript><p className="mt-3 font-semibold text-red-700">입력 확인 시연에는 자바스크립트가 필요합니다.</p></noscript>
 
       {/* name 속성이 없어 JavaScript가 꺼진 상태에서도 입력값이 URL에 포함되지 않습니다. */}
       <form noValidate onSubmit={handleSubmit} autoComplete="off" className="mt-8 space-y-6">
+        {Object.values(errors).some(Boolean) && <div role="alert" className="rounded-control border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">입력 항목을 확인해 주세요. 오류가 있는 첫 항목으로 이동했습니다.</div>}
         <div>
           <label htmlFor={`${prefix}-offering`} className="block font-semibold text-brand-navy">예시 기수 <span aria-hidden="true">*</span></label>
           <select ref={offeringRef} id={`${prefix}-offering`} value={offeringId} onChange={(event) => { setOfferingId(event.target.value); clearError("offering"); }} aria-required="true" aria-invalid={!!errors.offering} aria-describedby={[selectedChoice ? selectedId : null, errors.offering ? errorId("offering") : null].filter(Boolean).join(" ") || undefined} className={inputClass}>
@@ -120,8 +122,10 @@ export function ApplicationForm({ initialOfferingId, choices }: { initialOfferin
           </div>
           {errors.consent && <p id={errorId("consent")} className="mt-2 text-sm font-semibold text-red-700">{errors.consent}</p>}
         </div>
-        {Object.values(errors).some(Boolean) && <p role="alert" className="font-semibold text-red-700">입력 항목을 확인해 주세요.</p>}
-        <Button type="submit">입력 내용 확인</Button>
+        <div className="border-t border-line pt-5">
+          <p className="mb-3 text-sm text-muted">입력 확인 → 시연 완료 안내 · 입력 내용 전송·저장 없음</p>
+          <Button type="submit" className="w-full sm:w-auto">입력 내용 확인</Button>
+        </div>
       </form>
     </div>
   );

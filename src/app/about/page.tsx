@@ -14,7 +14,7 @@ export default async function AboutPage() {
   const {brand} = await getPublicBrand();
   return (
     <>
-      <section className="bg-surface">
+      <section className="page-intro bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-20">
           <p className="text-sm font-bold tracking-wide text-teal-ink">기관소개</p>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-16">

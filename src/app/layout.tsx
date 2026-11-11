@@ -9,7 +9,14 @@ import { getPublicBrand } from "@/lib/brand/public";
 
 export async function generateMetadata(): Promise<Metadata> {
   const {brand} = await getPublicBrand();
-  return {title: {default: brand.name, template: `%s | ${brand.name}`}, description: siteConfig.description};
+  const description = `${brand.slogan}. ${siteConfig.description}`;
+  return {
+    metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://ai-education-hub-ten.vercel.app"),
+    title: {default: brand.name, template: `%s | ${brand.name}`},
+    description,
+    openGraph: { title: brand.name, description, siteName: brand.name, locale: "ko_KR", type: "website", images: [{url: siteConfig.logoSrc, width: 1024, height: 1024, alt: `${brand.name} DEU_AI 로고`}] },
+    twitter: {card: "summary", title: brand.name, description, images: [siteConfig.logoSrc]},
+  };
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
