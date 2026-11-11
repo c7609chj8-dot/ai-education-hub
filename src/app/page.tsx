@@ -35,7 +35,7 @@ export default async function Home() {
               {brand.slogan}
             </h1>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted sm:text-lg">
-              챗GPT 입문부터 업무 개선, 전자책 제작, 소상공인 마케팅까지 직접 실습합니다.
+              경영·음악·항공영상·멀티미디어·프로그래밍·광고영상, 여섯 분야를 AI로 연결하는 배움을 준비합니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/programs" className="ui-button ui-button--primary">교육과정 보기 <span aria-hidden="true">→</span></Link>

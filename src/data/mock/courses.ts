@@ -12,10 +12,10 @@ export type Course = CoursePreview & {
   objectives: string[];
   weeks: string[];
   weeksCount: number;
-  durationHours: number;
+  durationHours: number | null;
 };
 
-export const courseCatalog = {
+export const legacyCourseCatalog = {
   life: {
     id: "life-chatgpt", slug: "life-chatgpt", title: "생활 속 챗GPT 활용",
     category: "AI 입문", audience: "일반 성인 · 중장년 · 시니어",
@@ -148,6 +148,87 @@ export const courseCatalog = {
   },
 } satisfies Record<string, Course>;
 
+export const courseCatalog = {
+  "management": {
+    "id": "ai-management",
+    "slug": "ai-management",
+    "title": "AI 경영관리학과",
+    "category": "경영·데이터",
+    "audience": "경영 실무자 · 관리자 · 창업 준비자",
+    "summary": "AI를 활용한 경영 자료 분석과 업무 개선을 탐색합니다.",
+    "resultArtifact": "경영 분석·업무개선 기획서",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  },
+  "music": {
+    "id": "ai-music",
+    "slug": "ai-music",
+    "title": "AI 음악제작학과",
+    "category": "음악·사운드",
+    "audience": "음악 창작 입문자 · 콘텐츠 제작자",
+    "summary": "AI와 함께 음악을 기획하고 사운드를 만드는 과정을 탐색합니다.",
+    "resultArtifact": "음악·사운드 포트폴리오",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  },
+  "aerial": {
+    "id": "ai-aerial-video",
+    "slug": "ai-aerial-video",
+    "title": "AI 항공영상제작학과",
+    "category": "드론·항공영상",
+    "audience": "드론·항공 촬영에 관심 있는 성인",
+    "summary": "항공 촬영 기획부터 AI 영상 편집까지 연결해 봅니다.",
+    "resultArtifact": "항공영상 포트폴리오",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  },
+  "multimedia": {
+    "id": "ai-multimedia",
+    "slug": "ai-multimedia",
+    "title": "AI 멀티미디어학과",
+    "category": "디자인·멀티미디어",
+    "audience": "디자인 입문자 · 디지털 콘텐츠 제작자",
+    "summary": "이미지·영상·사운드를 결합한 디지털 콘텐츠를 탐색합니다.",
+    "resultArtifact": "멀티미디어 콘텐츠 포트폴리오",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  },
+  "programming": {
+    "id": "ai-programming",
+    "slug": "ai-programming",
+    "title": "AI 프로그래밍학과",
+    "category": "개발·자동화",
+    "audience": "프로그래밍 입문자 · 업무 자동화 관심자",
+    "summary": "AI와 함께 코드를 이해하고 프로그램을 만드는 과정을 탐색합니다.",
+    "resultArtifact": "프로그램·자동화 프로젝트",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  },
+  "advertising": {
+    "id": "ai-advertising-video",
+    "slug": "ai-advertising-video",
+    "title": "AI 광고영상제작과",
+    "category": "광고·영상",
+    "audience": "마케팅 담당자 · 광고 콘텐츠 제작자",
+    "summary": "광고 기획과 스토리보드부터 AI 영상 제작까지 탐색합니다.",
+    "resultArtifact": "광고영상 포트폴리오",
+    "objectives": [],
+    "weeks": [],
+    "weeksCount": 0,
+    "durationHours": null
+  }
+} satisfies Record<string, Course>;
+
 export const courses = Object.values(courseCatalog);
 
 export type OfferingStatus = "모집중" | "마감임박" | "마감" | "예정";
@@ -164,11 +245,22 @@ export type Offering = {
 };
 
 export const sampleOfferings: Offering[] = [
-  { id: "sample-life", course: courseCatalog.life, startDate: "2026-11-16", endDate: "2027-02-01", location: "온라인", capacity: 20, enrolledCount: 8, status: "모집중" },
-  { id: "sample-work", course: courseCatalog.work, startDate: "2026-11-16", endDate: "2027-02-01", location: "강의실", capacity: 20, enrolledCount: 18, status: "마감임박" },
-  { id: "sample-ebook", course: courseCatalog.ebook, startDate: "2026-11-24", endDate: "2027-02-09", location: "온라인", capacity: 20, enrolledCount: 20, status: "마감" },
-  { id: "sample-instructor", course: courseCatalog.instructor, startDate: "2026-12-02", endDate: "2027-02-17", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
-  { id: "sample-business", course: courseCatalog.business, startDate: "2026-12-07", endDate: "2027-02-22", location: "온라인", capacity: 20, enrolledCount: 5, status: "모집중" },
+  { id: "sample-life", course: courseCatalog.management, startDate: "2026-11-16", endDate: "2027-02-01", location: "온라인", capacity: 20, enrolledCount: 8, status: "모집중" },
+  { id: "sample-work", course: courseCatalog.music, startDate: "2026-11-16", endDate: "2027-02-01", location: "강의실", capacity: 20, enrolledCount: 18, status: "마감임박" },
+  { id: "sample-ebook", course: courseCatalog.aerial, startDate: "2026-11-24", endDate: "2027-02-09", location: "온라인", capacity: 20, enrolledCount: 20, status: "마감" },
+  { id: "sample-instructor", course: courseCatalog.multimedia, startDate: "2026-12-02", endDate: "2027-02-17", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
+  { id: "sample-business", course: courseCatalog.programming, startDate: "2026-12-07", endDate: "2027-02-22", location: "온라인", capacity: 20, enrolledCount: 5, status: "모집중" },
+  { id: "sample-advertising", course: courseCatalog.advertising, startDate: "2026-12-14", endDate: "2027-03-01", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
 ];
 
-export const sampleOutcomes = [courseCatalog.life, courseCatalog.work, courseCatalog.ebook];
+export const sampleOutcomes = Object.values(courseCatalog);
+
+// 기존 DB 시드 회귀 검증용이며 공개 목록에는 사용하지 않습니다.
+export const legacySampleOfferings: Offering[] = [
+  { id: "sample-life", course: legacyCourseCatalog.life, startDate: "2026-11-16", endDate: "2027-02-01", location: "온라인", capacity: 20, enrolledCount: 8, status: "모집중" },
+  { id: "sample-work", course: legacyCourseCatalog.work, startDate: "2026-11-16", endDate: "2027-02-01", location: "강의실", capacity: 20, enrolledCount: 18, status: "마감임박" },
+  { id: "sample-ebook", course: legacyCourseCatalog.ebook, startDate: "2026-11-24", endDate: "2027-02-09", location: "온라인", capacity: 20, enrolledCount: 20, status: "마감" },
+  { id: "sample-instructor", course: legacyCourseCatalog.instructor, startDate: "2026-12-02", endDate: "2027-02-17", location: "강의실", capacity: 20, enrolledCount: 0, status: "예정" },
+  { id: "sample-business", course: legacyCourseCatalog.business, startDate: "2026-12-07", endDate: "2027-02-22", location: "온라인", capacity: 20, enrolledCount: 5, status: "모집중" },
+];
+

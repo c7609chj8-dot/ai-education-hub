@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
 import { connection } from "next/server";
-import { courses as exampleCourses, type CoursePreview } from "@/data/mock/courses";
+import { courses as exampleCourses, legacyCourseCatalog, type CoursePreview } from "@/data/mock/courses";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
 export type CourseWeek = { weekNumber: number; title: string };
@@ -57,7 +57,7 @@ export const findCourse = cache(async (slug: string): Promise<{ course: CourseDe
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return null;
   const source = getCourseSource();
   if (source === "mock") {
-    const course = exampleCourses.find((item) => item.slug === slug);
+    const course = [...exampleCourses, ...Object.values(legacyCourseCatalog)].find((item) => item.slug === slug);
     return course ? { course: { ...course, weeks: course.weeks.map((title, index) => ({ weekNumber: index + 1, title })) }, source, example: true } : null;
   }
   const supabase = createPublishedDataClient();
